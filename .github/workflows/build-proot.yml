@@ -20,7 +20,7 @@ jobs:
           packages: 'ndk;28.2.13676358'
 
       - name: Install build tools
-        run: sudo apt-get update && sudo apt-get install -y make git
+        run: sudo apt-get update && sudo apt-get install -y make git libtalloc-dev libarchive-dev uthash-dev
 
       - name: Clone PRoot
         run: git clone https://github.com/proot-me/proot -b master

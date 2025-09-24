@@ -78,13 +78,10 @@ jobs:
           ln -sf ${TOOLCHAIN}/bin/llvm-strip ${TOOLCHAIN}/bin/${TARGET}${API}-strip
 
           # talloc
-          export B_CFLAGS=$CFLAGS
-          export CFLAGS="-D_LARGEFILE_SOURCE=1 -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -I$PREFIX/include"
           cd $DWNLD/talloc
-          ./configure --host $TARGET --prefix=$PREFIX --cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot"
+          ./configure --host $TARGET --prefix=$PREFIX #--cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot"
           make
           make install
-          export CFLAGS=$B_CFLAGS
 
           # libarchive
           cd $DWNLD/zlib

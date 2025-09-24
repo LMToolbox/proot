@@ -31,7 +31,7 @@ jobs:
 
           mkdir -p ${{ env.PREFIX }}
           mkdir -p ${{ env.DWNLD }}
-          cp overrides/*.diff ${{ env.DWNLD }}/
+          cp patches/*.patch ${{ env.DWNLD }}/
           cd ${{ env.DWNLD }}
 
           # libarchive
@@ -81,7 +81,7 @@ jobs:
           # talloc
 
           cd $DWNLD/talloc
-          patch -p0 < $DWNLD/talloc.diff
+          patch -p0 < $DWNLD/talloc.patch
           ./configure --host $TARGET --prefix=$PREFIX --cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot"
           make
           make install

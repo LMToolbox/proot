@@ -21,7 +21,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Set up Android NDK
-        uses: android/setup-ndk@v3
+        uses: android-actions/setup-android@v3
         with:
           packages: 'ndk;28.2.13676358'
 

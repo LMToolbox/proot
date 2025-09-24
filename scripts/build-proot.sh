@@ -6,6 +6,6 @@ make -C src loader.elf build.h
 make -C src proot care
 
 mkdir -p dist
-mv src/proot dist/proot-$ARCH
-mv src/loader.elf dist/loader-$ARCH.elf
-mv src/care dist/care-$ARCH
+mv src/proot dist/
+mv src/loader.elf dist/
+mv src/care dist/

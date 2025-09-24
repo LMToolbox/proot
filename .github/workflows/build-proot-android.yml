@@ -71,11 +71,20 @@ jobs:
           export LDFLAGS="-L$PREFIX/lib"
 
           ln -sf ${TOOLCHAIN}/bin/${TARGET}${API}-clang ${TOOLCHAIN}/bin/${TARGET}${API}-gcc
-          ln -sf ${TOOLCHAIN}/bin/${TARGET}${API}-clang ${TOOLCHAIN}/bin/gcc
           ln -sf ${TOOLCHAIN}/bin/${TARGET}${API}-clang++ ${TOOLCHAIN}/bin/${TARGET}${API}-g++
           ln -sf ${TOOLCHAIN}/bin/llvm-strip ${TOOLCHAIN}/bin/${TARGET}${API}-strip
 
-          export PATH=$TOOLCHAIN/bin:$PATH
+          # talloc
+          export B_LDFLAGS=$LDFLAGS
+          export B_CFLAGS=$CFLAGS
+          export LDFLAGS="--sysroot=$TOOLCHAIN/sysroot -L$PREFIX/lib"
+          export CFLAGS="--sysroot=$TOOLCHAIN/sysroot -I$PREFIX/include"
+          cd $DWNLD/samba/lib/talloc
+          ./configure --host $TARGET --prefix=$PREFIX --cross-compile
+          make
+          make install
+          export LDFLAGS=$B_LDFLAGS
+          export CFLAGS=$B_CFLAGS
 
           # libarchive
           cd $DWNLD/zlib
@@ -105,12 +114,6 @@ jobs:
           make
           make install
           cd ..
-
-          # talloc
-          cd $DWNLD/samba/lib/talloc
-          ./configure --host $TARGET --prefix=$PREFIX 
-          make
-          make install
 
           # uthash
           cd $DWNLD/uthash

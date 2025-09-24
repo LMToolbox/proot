@@ -79,7 +79,9 @@ jobs:
           make install
 
           cd $DWNLD/libarchive
-          sed -i 's|#include "android_lf.h"|/* removed android_lf.h */|' libarchive/archive.h
+          for f in libarchive/archive.h libarchive/archive_entry.h; do # patch to remove android_lf.h include
+              sed -i 's|#include "android_lf.h"|/* removed android_lf.h */|' "$f"
+          done
           sh ./build/autogen.sh
           ./configure --host=$TARGET --prefix=$PREFIX \
             --without-xml2 \

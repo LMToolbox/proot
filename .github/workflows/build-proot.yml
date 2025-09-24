@@ -20,7 +20,7 @@ jobs:
           packages: 'ndk;28.2.13676358'
 
       - name: Install build tools
-        run: sudo apt-get update && sudo apt-get install -y make git
+        run: sudo apt-get update && sudo apt-get install -y make git libtalloc-dev
 
       - name: Clone PRoot
         run: git clone https://github.com/proot-me/proot -b master
@@ -51,21 +51,6 @@ jobs:
 
           # Build talloc
           export CROSS_COMPILE=${TOOLCHAIN}/${TARGET}${API}-
-          export CC=${TOOLCHAIN}/${TARGET}${API}-clang
-          export CXX=${TOOLCHAIN}/${TARGET}${API}-clang++
-          export AR=${TOOLCHAIN}/llvm-ar
-          export RANLIB=${TOOLCHAIN}/llvm-ranlib
-          export STRIP=${TOOLCHAIN}/llvm-strip
-
-          export CFLAGS="--sysroot=$NDK_DIR/platforms/android-${API}/arch-${ARCH} -fPIC"
-          export LDFLAGS="--sysroot=$NDK_DIR/platforms/android-${API}/arch-${ARCH}"
-
-          git clone --depth 1 https://gitlab.com/samba-team/samba.git
-          cd samba/lib/talloc
-          python3 waf configure --prefix=$PREFIX --destdir=$PREFIX
-          python3 waf build
-          python3 waf install
-
 
           # Symlink tools
           ln -sf ${TOOLCHAIN}/${TARGET}${API}-clang  ${TOOLCHAIN}/${TARGET}${API}-gcc

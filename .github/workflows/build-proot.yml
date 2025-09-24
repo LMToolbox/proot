@@ -45,11 +45,26 @@ jobs:
           NDK_DIR=$(ls -d $ANDROID_SDK_ROOT/ndk/* | sort -V | tail -n1)
           TOOLCHAIN=$NDK_DIR/toolchains/llvm/prebuilt/linux-x86_64/bin
           export CROSS_COMPILE=${TOOLCHAIN}/${TARGET}${API}-
+          export CC=${TOOLCHAIN}/${TARGET}${API}-clang
+          export CXX=${TOOLCHAIN}/${TARGET}${API}-clang++
+          export AR=${TOOLCHAIN}/llvm-ar
+          export RANLIB=${TOOLCHAIN}/llvm-ranlib
+          export STRIP=${TOOLCHAIN}/llvm-strip
 
-          # Symlink gcc and g++
+          export CFLAGS="--sysroot=$NDK_DIR/platforms/android-${API}/arch-${ARCH} -fPIC"
+          export LDFLAGS="--sysroot=$NDK_DIR/platforms/android-${API}/arch-${ARCH}"
+
+          git clone --depth 1 https://gitlab.com/samba-team/samba.git
+          cd samba/lib/talloc
+          python3 waf configure --prefix=$PREFIX --destdir=$PREFIX
+          python3 waf build
+          python3 waf install
+
+          # Symlink tools
           ln -sf ${TOOLCHAIN}/${TARGET}${API}-clang  ${TOOLCHAIN}/${TARGET}${API}-gcc
           ln -sf ${TOOLCHAIN}/${TARGET}${API}-clang++ ${TOOLCHAIN}/${TARGET}${API}-g++
-
+          ln -sf ${TOOLCHAIN}/llvm-strip ${TOOLCHAIN}/${TARGET}${API}-strip
+          export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH
           # Make
           make loader.elf loader-m32.elf build.h
           make proot care

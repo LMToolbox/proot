@@ -46,6 +46,8 @@ jobs:
           TOOLCHAIN=$NDK_DIR/toolchains/llvm/prebuilt/linux-x86_64/bin
           export CC=$TOOLCHAIN/${TARGET}${API}-clang
 
+          echo "Using compiler: $CC"
+
           # Make
           make loader.elf loader-m32.elf build.h
           make proot care

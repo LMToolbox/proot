@@ -5,25 +5,32 @@ on:
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         arch: [amd64, arm64]  # used by docker create --platform
         distro: ["ubuntu:latest"]
 
-    container:
-      image: ${{ matrix.distro }}
-      options: --platform linux/${{ matrix.arch }}
-
     steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: ${{ matrix.arch }}
+
       - name: Checkout repository
         uses: actions/checkout@v5
 
       - name: Run in Docker
         run: |
-          sh scripts/deps-install-$(echo '${{ matrix.distro }}' | cut -d':' -f1).sh
-          sh scripts/build-proot.sh"
-
+          docker run \
+            --rm \
+            -e ARCH=${{ matrix.arch }} \
+            -v $(pwd):/${{ github.workspace }} \
+            -w ${{ github.workspace }} \
+            --platform linux/${{ matrix.arch }} \
+            ${{ matrix.distro }} \
+            sh -c "sh scripts/deps-install-$(echo '${{ matrix.distro }}' | cut -d':' -f1).sh && sh scripts/build-proot.sh"
+        
       - name: Upload executables
         uses: actions/upload-artifact@v4
         with:

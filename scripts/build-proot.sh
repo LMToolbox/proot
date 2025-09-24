@@ -1,4 +1,4 @@
-git clone https://github.com/proot-me/proot
+git clone https://github.com/proot-me/proot -b 5f780cba57ce7ce557a389e1572e0d30026fcbca
 cd proot
 
 make -C src loader.elf build.h

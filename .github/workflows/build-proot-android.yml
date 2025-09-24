@@ -26,7 +26,7 @@ jobs:
 
       - name: Download dependencies
         run: |
-          sudo apt-get install -y autoconf automake libtool pkg-config
+          sudo apt-get install -y autoconf automake libtool pkg-config qemu-user-static
 
           mkdir -p ${{ env.PREFIX }}
           mkdir -p ${{ env.DWNLD }}
@@ -80,8 +80,7 @@ jobs:
           # export LDFLAGS="--sysroot=$TOOLCHAIN/sysroot -L$PREFIX/lib"
           # export CFLAGS="--sysroot=$TOOLCHAIN/sysroot -I$PREFIX/include"
           cd $DWNLD/samba/lib/talloc
-          export WAF_DISABLE_CONFIGURE_CHECKS=1
-          ./configure --host $TARGET --prefix=$PREFIX --cross-compile
+          ./configure --host $TARGET --prefix=$PREFIX --cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot"
           make
           make install
           # export LDFLAGS=$B_LDFLAGS

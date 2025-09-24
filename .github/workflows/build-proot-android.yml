@@ -1,0 +1,110 @@
+name: Build PRoot for Android on android
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        arch: [arm64, x86_64]
+
+    runs-on: ubuntu-latest
+    container:
+      image: cimg/android:2025.09.1-ndk
+      options: --user root
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      # - name: Install dependencies
+      #   run: |
+      #     apt-get update
+      #     apt-get install -y git curl wget tar qemu-user-static build-essential cmake autoconf automake libtool pkg-config
+
+      # - name: Download dependencies
+      #   run: |
+      #     mkdir -p deps
+      #     cd deps
+      #     # libarchive
+      #     git clone https://github.com/libarchive/libarchive.git -b v3.8.1
+      #     # talloc
+      #     curl -LO https://www.samba.org/ftp/talloc/talloc-2.4.3.tar.gz
+      #     tar xzf talloc-2.4.3.tar.gz
+      #     mv talloc-2.4.3 talloc
+      #     # uthash
+      #     git clone https://github.com/troydhanson/uthash.git -b v2.3.0
+
+      # - name: Setup standalone toolchain
+      #   run: |
+      #     ARCH=${{ matrix.arch }}
+      #     API=24
+      #     TOOLCHAIN_DIR=/tmp/ndk-toolchain-$ARCH
+      #     $ANDROID_NDK/build/tools/make_standalone_toolchain.py \
+      #       --arch $ARCH \
+      #       --api $API \
+      #       --install-dir $TOOLCHAIN_DIR
+          
+      #     echo "TOOLCHAIN_DIR=$TOOLCHAIN_DIR" >> $GITHUB_ENV
+      #     echo "ARCH=$ARCH" >> $GITHUB_ENV
+      #     echo "API=$API" >> $GITHUB_ENV
+
+      # - name: Build dependencies
+      #   run: |
+      #     # export PATH=$TOOLCHAIN_DIR/bin:$PATH
+      #     # export CC=${ARCH}-linux-android-gcc
+      #     # export CXX=${ARCH}-linux-android-g++
+      #     # export SYSROOT=$TOOLCHAIN_DIR/sysroot
+
+      #     # libarchive
+      #     cd deps/libarchive
+      #     ./build/autogen.sh || true
+      #     ./configure --host=${ARCH}-linux-android --prefix=$TOOLCHAIN_DIR --enable-static --disable-shared --without-lzma --without-bz2
+      #     make -j$(nproc)
+      #     make install
+
+      #     # talloc
+      #     cd ../talloc
+      #     ./configure --host=${ARCH}-linux-android --prefix=$TOOLCHAIN_DIR
+      #     make -j$(nproc)
+      #     make install
+
+      - name: Build PRoot
+        run: |
+          cd proot/src
+
+          # Ustal target
+          case "${ARCH}" in
+            arm64)
+              TARGET=aarch64-linux-android
+              ;;
+            x86_64)
+              TARGET=x86_64-linux-android
+              ;;
+          esac
+
+          # PREFIX=$(pwd)/build/install
+          # mkdir -p $PREFIX
+
+          export CC=${TARGET}${API}-clang
+          export CXX=${TARGET}${API}-clang++
+
+          # Symlink tools
+          ln -sf ${TOOLCHAIN}/${TARGET}${API}-clang  ${TOOLCHAIN}/${TARGET}${API}-gcc
+          ln -sf ${TOOLCHAIN}/${TARGET}${API}-clang++ ${TOOLCHAIN}/${TARGET}${API}-g++
+          ln -sf ${TOOLCHAIN}/llvm-strip ${TOOLCHAIN}/${TARGET}${API}-strip
+          export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH
+
+          make loader.elf loader-m32.elf build.h
+          make proot care
+
+          mkdir -p ../../dist/$ARCH
+          cp proot ../../dist/$ARCH/
+          cp care ../../dist/$ARCH/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: proot-android-${{ matrix.arch }}
+          path: dist/${{ matrix.arch }}/

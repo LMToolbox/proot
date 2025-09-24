@@ -8,22 +8,49 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        abi: [arm64-v8a, x86_64]
+        arch: [arm64, x86_64]
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
 
       - name: Set up Android NDK
-        uses: android-actions/setup-android@v3
+        uses: nttld/setup-ndk@v1
+        id: setup-ndk
         with:
-          packages: 'ndk;28.2.13676358'
+          ndk-version: r28c
 
-      - name: Install build tools
-        run: sudo apt-get update && sudo apt-get install -y make git libtalloc-dev
+      - name: Download dependencies
+        run: |
+          mkdir -p deps
+          cd deps
+          # libarchive
+          git clone https://github.com/libarchive/libarchive.git -b v3.8.1
+          # libtalloc
+          curl -LO https://www.samba.org/ftp/talloc/talloc-2.4.3.tar.gz
+          tar xzf talloc-2.4.3.tar.gz
+          mv talloc-2.4.3 talloc
+          # uthash
+          git clone https://github.com/troydhanson/uthash.git -b v2.3.0 
 
-      - name: Clone PRoot
-        run: git clone https://github.com/proot-me/proot -b master
+      - name: Build and install dependencies
+        env:
+          ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
+        run: |
+          $ANDROID_NDK/build/tools/make_standalone_toolchain.py \
+            --arch ${{ matrix.arch }} \
+            --api 24 \
+            --install-dir /tmp/my-ndk-toolchain
+            
+          export PATH=/tmp/my-ndk-toolchain/bin:$PATH
+          export CC=${{ matrix.arch }}-linux-android-gcc
+          export CXX=${{ matrix.arch }}-linux-android-g++
+          export SYSROOT=/tmp/my-ndk-toolchain/sysroot
+
+          # Build libarchive
+          cd deps/libarchive
+
+
 
       - name: Build PRoot and CARE
         run: |

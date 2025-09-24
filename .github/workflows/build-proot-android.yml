@@ -34,12 +34,13 @@ jobs:
 
           # libarchive
           git clone https://github.com/libarchive/libarchive.git -b v3.8.1
-          git clone https://gitlab.gnome.org/GNOME/libxml2 
+          git clone https://github.com/madler/zlib.git -b v1.3.1
 
           # talloc
           curl -LO https://www.samba.org/ftp/talloc/talloc-2.4.3.tar.gz
           tar xzf talloc-2.4.3.tar.gz
           mv talloc-2.4.3 talloc
+          
           # uthash
           git clone https://github.com/troydhanson/uthash.git -b v2.3.0
 
@@ -68,26 +69,32 @@ jobs:
           export DWNLD=$(realpath $DWNLD)
           export PREFIX=$(realpath $PREFIX)
 
+          export CFLAGS="-I$PREFIX/include"
+          export LDFLAGS="-L$PREFIX/lib"
+
           # libarchive
+          cd $DWNLD/zlib
+          ./configure --prefix=$PREFIX --static
+          make
+          make install
+
+
           cd $DWNLD/libarchive
           sh ./build/autogen.sh
           ./configure --host=$TARGET --prefix=$PREFIX \
-          --disable-lzma \
-          --disable-bz2 \
-          --disable-lz4 \
-          --disable-zstd \
-          --disable-xattr \
-          --disable-acl \
-          --disable-iconv \
-          --disable-expat \
-          --disable-nettle \
-          --disable-openssl \
-          --disable-xml2 \
-          --disable-cng \
-          --disable-xar \
-          --disable-cpio \
-          --disable-shared \
-          --enable-static 
+            --without-xml2 \
+            --without-openssl \
+            --without-nettle \
+            --without-expat \
+            --without-iconv \
+            --without-bz2lib \
+            --without-lzma \
+            --without-lz4 \
+            --without-zstd \
+            --without-xattr \
+            --without-acl \
+            --disable-shared \
+            --enable-static
           make
           make install
           cd ..
@@ -110,9 +117,6 @@ jobs:
           ln -sf ${TOOLCHAIN}/${TARGET}${API}-clang++ ${TOOLCHAIN}/${TARGET}${API}-g++
           ln -sf ${TOOLCHAIN}/llvm-strip ${TOOLCHAIN}/${TARGET}${API}-strip
           export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH
-
-          export CFLAGS="-I$PREFIX/include"
-          export LDFLAGS="-L$PREFIX/lib"
 
           make loader.elf loader-m32.elf build.h
           make proot care

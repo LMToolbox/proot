@@ -38,7 +38,9 @@ jobs:
           git clone https://github.com/madler/zlib.git -b v1.3.1
 
           # talloc
-          git clone https://gitlab.com/samba-team/samba.git -b talloc-2.4.3
+          curl -LO https://www.samba.org/ftp/talloc/talloc-2.4.3.tar.gz
+          tar xzf talloc-2.4.3.tar.gz
+          mv talloc-2.4.3 talloc
           
           # uthash
           git clone https://github.com/troydhanson/uthash.git -b v2.3.0
@@ -77,13 +79,13 @@ jobs:
 
           # talloc
           export B_CFLAGS=$CFLAGS
-          export CFLAGS="-D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -I$PREFIX/include"
-          cd $DWNLD/samba/lib/talloc
+          export CFLAGS="-D_LARGEFILE_SOURCE=1 -D_LARGEFILE64_SOURCE=1 -D_FILE_OFFSET_BITS=64 -I$PREFIX/include"
+          cd $DWNLD/talloc
           ./configure --host $TARGET --prefix=$PREFIX --cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot"
           make
           make install
           export CFLAGS=$B_CFLAGS
-          
+
           # libarchive
           cd $DWNLD/zlib
           ./configure --prefix=$PREFIX --static

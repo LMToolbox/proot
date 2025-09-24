@@ -86,7 +86,7 @@ jobs:
             for p in *.patch; do
               [ -f "$p" ] || continue
               echo "Applying patch $p"
-              patch -p1 < "$p"
+              patch -p0 < "$p"
             done
           }
 

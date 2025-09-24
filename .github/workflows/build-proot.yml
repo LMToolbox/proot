@@ -1,0 +1,39 @@
+name: Build PRoot
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [amd64, arm64]  # used by docker create --platform
+        distro: ["ubuntu:latest"]
+
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: ${{ matrix.arch }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Run in Docker
+        env:
+          arch: ${{ matrix.arch }}
+        run: |
+          docker run \
+            --rm \
+            -v $(pwd):/${{ github.workspace }} \
+            -w ${{ github.workspace }} \
+            --platform linux/$arch \
+            ${{ matrix.distro }} \
+            sh -c "sh scripts/deps-install-$(echo '${{ matrix.distro }}' | cut -d':' -f1).sh && sh scripts/build-proot.sh"
+        
+      - name: Upload executables
+        uses: actions/upload-artifact@v4
+        with:
+          name: SRC+BIN_proot-${{ matrix.arch }}
+          path: proot/dist/

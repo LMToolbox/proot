@@ -58,6 +58,10 @@ jobs:
           export TARGET=$ARCH-linux-android
           export API=24
 
+
+          export DWNLD=$(realpath $DWNLD)
+          export PREFIX=$(realpath $PREFIX)
+
           export AR=$TOOLCHAIN/bin/llvm-ar
           export CC="$TOOLCHAIN/bin/clang --target=$TARGET$API"
           export AS=$CC
@@ -66,11 +70,12 @@ jobs:
           export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
           export STRIP=$TOOLCHAIN/bin/llvm-strip
 
-          export DWNLD=$(realpath $DWNLD)
-          export PREFIX=$(realpath $PREFIX)
-
           export CFLAGS="-I$PREFIX/include"
           export LDFLAGS="-L$PREFIX/lib"
+
+          ln -sf ${TOOLCHAIN}/bin/${TARGET}${API}-clang  ${TOOLCHAIN}/bin/${TARGET}${API}-gcc
+          ln -sf ${TOOLCHAIN}/bin/${TARGET}${API}-clang++ ${TOOLCHAIN}/bin/${TARGET}${API}-g++
+          ln -sf ${TOOLCHAIN}/bin/llvm-strip ${TOOLCHAIN}/bin/${TARGET}${API}-strip
 
           # libarchive
           cd $DWNLD/zlib
@@ -103,7 +108,7 @@ jobs:
 
           # talloc
           cd $DWNLD/talloc
-          ./configure --host $TARGET --prefix=$PREFIX
+          ./configure --host $TARGET --prefix=$PREFIX CC=$TOOLCHAIN/bin/$TARGET$API-gcc CXX=$TOOLCHAIN/bin/$TARGET$API-g++
           make
           make install
 
@@ -112,14 +117,9 @@ jobs:
           mkdir -p $PREFIX/include/
           cp -r src/* $PREFIX/include/
 
+
+
           cd $DWNLD/proot/src
-
-          # Symlink tools
-          ln -sf ${TOOLCHAIN}/${TARGET}${API}-clang  ${TOOLCHAIN}/${TARGET}${API}-gcc
-          ln -sf ${TOOLCHAIN}/${TARGET}${API}-clang++ ${TOOLCHAIN}/${TARGET}${API}-g++
-          ln -sf ${TOOLCHAIN}/llvm-strip ${TOOLCHAIN}/${TARGET}${API}-strip
-          export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH
-
           make loader.elf loader-m32.elf build.h
           make proot care
 

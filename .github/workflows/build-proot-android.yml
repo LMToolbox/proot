@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
 
 env:
-  PREFIX: /tmp/libs/installed
-
+  PREFIX: ./dependencies/install
+  DWNLD: ./dependencies/download
 jobs:
   build:
     strategy:
@@ -26,8 +26,9 @@ jobs:
 
       - name: Download dependencies
         run: |
-          mkdir -p /tmp/libs/installed
-          cd /tmp/libs
+          mkdir -p ${{ env.PREFIX }}
+          mkdir -p ${{ env.DWNLD }}
+          cd ${{ env.DWNLD }}
           # libarchive
           git clone https://github.com/libarchive/libarchive.git -b v3.8.1
           # talloc
@@ -44,6 +45,7 @@ jobs:
           ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
           ARCH: ${{ matrix.arch }}
           PREFIX: ${{ env.PREFIX }}
+          DWNLD: ${{ env.DWNLD }}
         run: |
 
           export TOOLCHAIN=$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64
@@ -58,25 +60,28 @@ jobs:
           export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
           export STRIP=$TOOLCHAIN/bin/llvm-strip
 
+          export DWNLD=$(realpath $DWNLD)
+          export PREFIX=$(realpath $PREFIX)
           # libarchive
-          cd /tmp/libs/libarchive
+          cd $DWNLD/libarchive
           # Configure and build.
-          ./configure --host $TARGET --prefix=$PREFI
+          ./configure --host $TARGET --prefix=$PREFIX
           make
           make install
+          cd ..
 
           # talloc
-          cd /tmp/libs/talloc
+          cd $DWNLD/talloc
           ./configure --host $TARGET --prefix=$PREFIX
           make
           make install
 
           # uthash
-          cd /tmp/libs/uthash
+          cd $DWNLD/uthash
           mkdir -p $PREFIX/include/
           cp -r src/* $PREFIX/include/
 
-          cd /tmp/libs/proot/src
+          cd $DWNLD/proot/src
 
           # Symlink tools
           ln -sf ${TOOLCHAIN}/${TARGET}${API}-clang  ${TOOLCHAIN}/${TARGET}${API}-gcc

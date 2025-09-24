@@ -80,7 +80,6 @@ jobs:
           --disable-acl \
           --disable-iconv \
           --disable-expat \
-          --disable-cng \
           --disable-nettle \
           --disable-openssl \
           --disable-xml2 \
@@ -88,19 +87,7 @@ jobs:
           --disable-xar \
           --disable-cpio \
           --disable-shared \
-          --enable-static \
-          --without-xml2 \
-          --without-openssl \
-          --without-nettle \
-          --without-expat \
-          --without-iconv \
-          --without-zlib \
-          --without-bz2lib \
-          --without-lzma \
-          --without-lz4 \
-          --without-zstd \
-          --without-xattr \
-          --without-acl
+          --enable-static 
           make
           make install
           cd ..

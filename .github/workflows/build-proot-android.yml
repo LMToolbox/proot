@@ -70,9 +70,12 @@ jobs:
           export CFLAGS="-I$PREFIX/include"
           export LDFLAGS="-L$PREFIX/lib"
 
-          ln -sf ${TOOLCHAIN}/bin/${TARGET}${API}-clang  ${TOOLCHAIN}/bin/${TARGET}${API}-gcc
+          ln -sf ${TOOLCHAIN}/bin/${TARGET}${API}-clang ${TOOLCHAIN}/bin/${TARGET}${API}-gcc
+          ln -sf ${TOOLCHAIN}/bin/${TARGET}${API}-clang ${TOOLCHAIN}/bin/gcc
           ln -sf ${TOOLCHAIN}/bin/${TARGET}${API}-clang++ ${TOOLCHAIN}/bin/${TARGET}${API}-g++
           ln -sf ${TOOLCHAIN}/bin/llvm-strip ${TOOLCHAIN}/bin/${TARGET}${API}-strip
+
+          export PATH=$TOOLCHAIN/bin:$PATH
 
           # libarchive
           cd $DWNLD/zlib

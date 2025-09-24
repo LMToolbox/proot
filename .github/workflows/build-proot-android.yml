@@ -75,16 +75,17 @@ jobs:
           ln -sf ${TOOLCHAIN}/bin/llvm-strip ${TOOLCHAIN}/bin/${TARGET}${API}-strip
 
           # talloc
-          export B_LDFLAGS=$LDFLAGS
-          export B_CFLAGS=$CFLAGS
-          export LDFLAGS="--sysroot=$TOOLCHAIN/sysroot -L$PREFIX/lib"
-          export CFLAGS="--sysroot=$TOOLCHAIN/sysroot -I$PREFIX/include"
+          # export B_LDFLAGS=$LDFLAGS
+          # export B_CFLAGS=$CFLAGS
+          # export LDFLAGS="--sysroot=$TOOLCHAIN/sysroot -L$PREFIX/lib"
+          # export CFLAGS="--sysroot=$TOOLCHAIN/sysroot -I$PREFIX/include"
           cd $DWNLD/samba/lib/talloc
+          export WAF_DISABLE_CONFIGURE_CHECKS=1
           ./configure --host $TARGET --prefix=$PREFIX --cross-compile
           make
           make install
-          export LDFLAGS=$B_LDFLAGS
-          export CFLAGS=$B_CFLAGS
+          # export LDFLAGS=$B_LDFLAGS
+          # export CFLAGS=$B_CFLAGS
 
           # libarchive
           cd $DWNLD/zlib

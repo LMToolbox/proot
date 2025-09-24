@@ -1,29 +1,49 @@
 --- wscript.orig	2025-02-06 13:36:55.107552000 +0100
-+++ wscript	2025-09-25 01:14:29.881198914 +0200
-@@ -48,44 +48,28 @@
-         conf.env.PKGCONFIGDIR = '${LIBDIR}/pkgconfig'
-         conf.env.TALLOC_VERSION = VERSION
++++ wscript	2025-09-25 01:26:31.127218600 +0200
+@@ -15,8 +15,7 @@
+ out = 'bin'
  
--    conf.CHECK_XSLTPROC_MANPAGES()
-+    conf.env.DISABLE_LFS_CHECKS = True
-+    conf.env.disable_python = True
+ import wafsamba
+-from wafsamba import samba_dist, samba_utils
+-from waflib import Logs, Options, Context
++from wafsamba import samba_dist
  
-     conf.CHECK_HEADERS('sys/auxv.h')
-     conf.CHECK_FUNCS('getauxval')
+ # setup what directories to put in a tarball
+ samba_dist.DIST_DIRS("""lib/talloc:. lib/replace:lib/replace
+@@ -35,57 +34,26 @@
  
-     conf.SAMBA_CONFIG_H()
+ def configure(conf):
+     conf.RECURSE('lib/replace')
 -
-     conf.SAMBA_CHECK_UNDEFINED_SYMBOL_FLAGS()
+     conf.env.standalone_talloc = conf.IN_LAUNCH_DIR()
  
+     conf.define('TALLOC_BUILD_VERSION_MAJOR', int(VERSION.split('.')[0]))
+     conf.define('TALLOC_BUILD_VERSION_MINOR', int(VERSION.split('.')[1]))
+     conf.define('TALLOC_BUILD_VERSION_RELEASE', int(VERSION.split('.')[2]))
+ 
+-    conf.env.TALLOC_COMPAT1 = False
+-    if conf.env.standalone_talloc:
+-        conf.env.TALLOC_COMPAT1 = Options.options.TALLOC_COMPAT1
+-        conf.env.PKGCONFIGDIR = '${LIBDIR}/pkgconfig'
+-        conf.env.TALLOC_VERSION = VERSION
+-
+-    conf.CHECK_XSLTPROC_MANPAGES()
+-
+-    conf.CHECK_HEADERS('sys/auxv.h')
+-    conf.CHECK_FUNCS('getauxval')
+-
+-    conf.SAMBA_CONFIG_H()
+-
+-    conf.SAMBA_CHECK_UNDEFINED_SYMBOL_FLAGS()
+-
 -    conf.SAMBA_CHECK_PYTHON()
 -    conf.SAMBA_CHECK_PYTHON_HEADERS()
 -
-     if not conf.env.standalone_talloc:
-         if conf.CHECK_BUNDLED_SYSTEM_PKG('talloc', minversion=VERSION,
+-    if not conf.env.standalone_talloc:
+-        if conf.CHECK_BUNDLED_SYSTEM_PKG('talloc', minversion=VERSION,
 -                                     implied_deps='replace'):
-+                                         implied_deps='replace'):
-             conf.define('USING_SYSTEM_TALLOC', 1)
- 
+-            conf.define('USING_SYSTEM_TALLOC', 1)
+-
 -        if conf.env.disable_python:
 -            using_system_pytalloc_util = False
 -        else:
@@ -32,41 +52,65 @@
 -            if not conf.CHECK_BUNDLED_SYSTEM_PKG(name, minversion=VERSION,
 -                                                 implied_deps='talloc replace'):
 -                using_system_pytalloc_util = False
--
++    conf.env.disable_python = True
++    conf.env.DISABLE_LFS_CHECKS = True
++    conf.env.STANDALONE_ONLY = True
+ 
 -        if using_system_pytalloc_util:
 -            conf.define('USING_SYSTEM_PYTALLOC_UTIL', 1)
--
++    conf.env.HAVE_SYS_AUXV_H = True
++    conf.env.HAVE_GETAUXVAL = True
+ 
  
  def build(bld):
      bld.RECURSE('lib/replace')
- 
--    if bld.env.standalone_talloc:
--        private_library = False
 +    private_library = not bld.env.standalone_talloc
  
+     if bld.env.standalone_talloc:
+-        private_library = False
+-
 -        # should we also install the symlink to libtalloc1.so here?
 -        bld.SAMBA_LIBRARY('talloc-compat1-%s' % (VERSION),
-+    if bld.env.standalone_talloc:
 +        bld.SAMBA_LIBRARY('talloc-compat1-%s' % VERSION,
                            'compat/talloc_compat1.c',
                            public_deps='talloc',
                            soname='libtalloc.so.1',
-@@ -106,11 +90,7 @@
-                          'test_magic_differs_helper.c',
-                          'talloc', install=False)
+@@ -93,100 +61,26 @@
+                           public_headers=[],
+                           enabled=bld.env.TALLOC_COMPAT1)
  
+-        testsuite_deps = 'talloc replace'
+-        if bld.CONFIG_SET('HAVE_PTHREAD'):
+-            testsuite_deps += ' pthread'
+-
+-        bld.SAMBA_BINARY('talloc_testsuite',
+-                         'testsuite_main.c testsuite.c',
+-                         testsuite_deps,
+-                         install=False)
+-
+-        bld.SAMBA_BINARY('talloc_test_magic_differs_helper',
+-                         'test_magic_differs_helper.c',
+-                         'talloc', install=False)
+-
 -    else:
 -        private_library = True
 -
-     if not bld.CONFIG_SET('USING_SYSTEM_TALLOC'):
+-    if not bld.CONFIG_SET('USING_SYSTEM_TALLOC'):
 -
-         bld.SAMBA_LIBRARY('talloc',
-                           'talloc.c',
-                           deps='replace',
-@@ -125,68 +105,42 @@
-                           private_library=private_library,
-                           manpages='man/talloc.3')
- 
+-        bld.SAMBA_LIBRARY('talloc',
+-                          'talloc.c',
+-                          deps='replace',
+-                          provide_builtin_linking=True,
+-                          abi_directory='ABI',
+-                          abi_match='talloc* _talloc*',
+-                          hide_symbols=True,
+-                          vnum=VERSION,
+-                          public_headers=('' if private_library else 'talloc.h'),
+-                          pc_files='talloc.pc',
+-                          public_headers_install=not private_library,
+-                          private_library=private_library,
+-                          manpages='man/talloc.3')
+-
 -    if not bld.CONFIG_SET('USING_SYSTEM_PYTALLOC_UTIL'):
 -        name = bld.pyembed_libname('pytalloc-util')
 -
@@ -96,48 +140,55 @@
 -                         realname='_test_pytalloc.so',
 -                         install=False)
 -
- 
- def testonly(ctx):
-     '''run talloc testsuite'''
-     import samba_utils
 -
-     samba_utils.ADD_LD_LIBRARY_PATH('bin/shared')
-     samba_utils.ADD_LD_LIBRARY_PATH('bin/shared/private')
+-def testonly(ctx):
+-    '''run talloc testsuite'''
+-    import samba_utils
++    bld.SAMBA_LIBRARY('talloc',
++                      'talloc.c',
++                      deps='replace',
++                      provide_builtin_linking=True,
++                      abi_directory='ABI',
++                      abi_match='talloc* _talloc*',
++                      hide_symbols=True,
++                      vnum=VERSION,
++                      public_headers=('' if private_library else 'talloc.h'),
++                      pc_files='talloc.pc',
++                      public_headers_install=not private_library,
++                      private_library=private_library,
++                      manpages='man/talloc.3')
  
-     cmd = os.path.join(Context.g_module.out, 'talloc_testsuite')
-     ret = samba_utils.RUN_COMMAND(cmd)
-     print("testsuite returned %d" % ret)
-+
-     magic_helper_cmd = os.path.join(Context.g_module.out, 'talloc_test_magic_differs_helper')
-     magic_cmd = os.path.join(Context.g_module.top, 'lib', 'talloc',
-                              'test_magic_differs.sh')
-     if not os.path.exists(magic_cmd):
-         magic_cmd = os.path.join(Context.g_module.top, 'test_magic_differs.sh')
- 
+-    samba_utils.ADD_LD_LIBRARY_PATH('bin/shared')
+-    samba_utils.ADD_LD_LIBRARY_PATH('bin/shared/private')
+-
+-    cmd = os.path.join(Context.g_module.out, 'talloc_testsuite')
+-    ret = samba_utils.RUN_COMMAND(cmd)
+-    print("testsuite returned %d" % ret)
+-    magic_helper_cmd = os.path.join(Context.g_module.out, 'talloc_test_magic_differs_helper')
+-    magic_cmd = os.path.join(Context.g_module.top, 'lib', 'talloc',
+-                             'test_magic_differs.sh')
+-    if not os.path.exists(magic_cmd):
+-        magic_cmd = os.path.join(Context.g_module.top, 'test_magic_differs.sh')
+-
 -    magic_ret = samba_utils.RUN_COMMAND(magic_cmd + " " +  magic_helper_cmd)
-+    magic_ret = samba_utils.RUN_COMMAND(magic_cmd + " " + magic_helper_cmd)
-     print("magic differs test returned %d" % magic_ret)
+-    print("magic differs test returned %d" % magic_ret)
 -    pyret = samba_utils.RUN_PYTHON_TESTS(['test_pytalloc.py'])
 -    print("python testsuite returned %d" % pyret)
-+
-+    pyret = 0
-+
-     sys.exit(ret or magic_ret or pyret)
- 
+-    sys.exit(ret or magic_ret or pyret)
+-
 -# WAF doesn't build the unit tests for this, maybe because they don't link with talloc?
 -# This forces it
-+
- def test(ctx):
-     Options.commands.append('build')
-     Options.commands.append('testonly')
+-def test(ctx):
+-    Options.commands.append('build')
+-    Options.commands.append('testonly')
  
-+
  def dist():
-     '''makes a tarball for distribution'''
+-    '''makes a tarball for distribution'''
      samba_dist.dist()
  
 +
  def reconfigure(ctx):
-     '''reconfigure if config scripts have changed'''
+-    '''reconfigure if config scripts have changed'''
++    import samba_utils
      samba_utils.reconfigure(ctx)
 +

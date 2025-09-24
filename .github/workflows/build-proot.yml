@@ -14,66 +14,49 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v5
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-
       - name: Set up Android NDK
         uses: android-actions/setup-android@v3
         with:
           packages: 'ndk;28.2.13676358'
 
-      - name: Set up build tools
+      - name: Install build tools
         run: sudo apt-get update && sudo apt-get install -y make git
 
       - name: Clone PRoot
         run: git clone https://github.com/proot-me/proot -b master
 
-      - name: Build PRoot .so
+      - name: Build PRoot and CARE
         run: |
           cd proot/src
-          
-          # Choose toolchain and architecture
+
+          # Detect target triplet
           case "${{ matrix.abi }}" in
-            armeabi-v7a)
-              TARGET=armv7a-linux-androideabi
-              ;;
             arm64-v8a)
               TARGET=aarch64-linux-android
-              ;;
-            x86)
-              TARGET=i686-linux-android
+              API=24
               ;;
             x86_64)
               TARGET=x86_64-linux-android
+              API=24
               ;;
           esac
-          
-          NDK_DIR=$(ls -d "$ANDROID_SDK_ROOT/ndk/"*/ | sort -V | tail -n1)
-          TOOLCHAIN="$NDK_DIR/toolchains/llvm/prebuilt/linux-x86_64/bin"
 
-          CC=$TOOLCHAIN/${TARGET}24-clang
-          CFLAGS="-fPIC -O2 -DANDROID"
-          LDFLAGS="-shared"
+          # Find NDK clang
+          NDK_DIR=$(ls -d $ANDROID_SDK_ROOT/ndk/* | sort -V | tail -n1)
+          TOOLCHAIN=$NDK_DIR/toolchains/llvm/prebuilt/linux-x86_64/bin
+          export CC=$TOOLCHAIN/${TARGET}${API}-clang
 
-          echo "Compiling for $TARGET"
+          # Make
+          make loader.elf loader-m32.elf build.h
+          make proot care
 
-          # Compile to .o
-          $CC $CFLAGS -c proot.c -o proot.o
-          $CC $CFLAGS -c loader.c -o loader.o
-          $CC $CFLAGS -c loader-m32.c -o loader-m32.o
-          $CC $CFLAGS -c care.c -o care.o
-
-          # Link to .so
-          $CC $LDFLAGS -o libproot.so proot.o loader.o loader-m32.o care.o
-
+          # Copy executables to dist folder
           mkdir -p ../../dist/${{ matrix.abi }}
-          mv libproot.so ../../dist/${{ matrix.abi }}/
+          cp proot ../../dist/${{ matrix.abi }}/
+          cp care ../../dist/${{ matrix.abi }}/
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: proot-android-${{ matrix.abi }}
-          path: dist/${{ matrix.abi }}/libproot.so
+          path: dist/${{ matrix.abi }}/

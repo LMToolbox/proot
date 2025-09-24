@@ -37,7 +37,7 @@ jobs:
           git clone https://github.com/madler/zlib.git -b v1.3.1
 
           # talloc
-          git clone https://gitlab.com/samba-team/samba -b talloc-2.4.3
+          git clone https://gitlab.com/samba-team/samba.git -b talloc-2.4.3
           
           # uthash
           git clone https://github.com/troydhanson/uthash.git -b v2.3.0

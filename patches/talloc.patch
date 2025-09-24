@@ -1,7 +1,9 @@
-*** wscript.orig   2025-09-24 12:00:00.000000000 +0000
---- wscript        2025-09-24 12:05:00.000000000 +0000
-***************
-*** 161,168 ****
+--- wscript.orig	2025-02-06 13:36:55.107552000 +0100
++++ wscript	2025-09-25 00:54:08.661912824 +0200
+@@ -97,14 +97,15 @@
+         if bld.CONFIG_SET('HAVE_PTHREAD'):
+             testsuite_deps += ' pthread'
+ 
 -        bld.SAMBA_BINARY('talloc_testsuite',
 -                         'testsuite_main.c testsuite.c',
 -                         testsuite_deps,
@@ -10,8 +12,7 @@
 -        bld.SAMBA_BINARY('talloc_test_magic_differs_helper',
 -                         'test_magic_differs_helper.c',
 -                         'talloc', install=False)
---- 161,170 ----
-+        if not bld.env.CROSS_COMPILE:
++        if not getattr(bld.env, 'CROSS_COMPILE', False):
 +            bld.SAMBA_BINARY('talloc_testsuite',
 +                             'testsuite_main.c testsuite.c',
 +                             testsuite_deps,
@@ -20,42 +21,64 @@
 +            bld.SAMBA_BINARY('talloc_test_magic_differs_helper',
 +                             'test_magic_differs_helper.c',
 +                             'talloc', install=False)
-***************
-*** 207,211 ****
+ 
+     else:
+         private_library = True
+@@ -137,7 +138,7 @@
+                 abi_directory='ABI',
+                 abi_match='pytalloc_* _pytalloc_*',
+                 private_library=private_library,
+-                public_headers=('' if private_library else 'pytalloc.h'),
++                public_headers=('' if private_library else 'talloc.h'),
+                 pc_files='pytalloc-util.pc',
+                 enabled=bld.PYTHON_BUILD_IS_ENABLED()
+                 )
+@@ -147,16 +148,21 @@
+                          enabled=bld.PYTHON_BUILD_IS_ENABLED(),
+                          realname='talloc.so')
+ 
 -        bld.SAMBA_PYTHON('test_pytalloc',
 -                         'test_pytalloc.c',
 -                         deps=name,
 -                         enabled=bld.PYTHON_BUILD_IS_ENABLED(),
 -                         realname='_test_pytalloc.so',
 -                         install=False)
---- 207,210 ----
-+        if not bld.env.CROSS_COMPILE:
++        if not getattr(bld.env, 'CROSS_COMPILE', False):
 +            bld.SAMBA_PYTHON('test_pytalloc',
 +                             'test_pytalloc.c',
 +                             deps=name,
 +                             enabled=bld.PYTHON_BUILD_IS_ENABLED(),
 +                             realname='_test_pytalloc.so',
 +                             install=False)
-***************
-*** 238,242 ****
--    import samba_utils
--
--    samba_utils.ADD_LD_LIBRARY_PATH('bin/shared')
--    samba_utils.ADD_LD_LIBRARY_PATH('bin/shared/private')
--    cmd = os.path.join(Context.g_module.out, 'talloc_testsuite')
--    ret = samba_utils.RUN_COMMAND(cmd)
--    print("testsuite returned %d" % ret)
--    magic_helper_cmd = os.path.join(Context.g_module.out, 'talloc_test_magic_differs_helper')
--    magic_cmd = os.path.join(Context.g_module.top, 'lib', 'talloc',
--                             'test_magic_differs.sh')
--    if not os.path.exists(magic_cmd):
--        magic_cmd = os.path.join(Context.g_module.top, 'test_magic_differs.sh')
--
--    magic_ret = samba_utils.RUN_COMMAND(magic_cmd + " " +  magic_helper_cmd)
--    print("magic differs test returned %d" % magic_ret)
--    pyret = samba_utils.RUN_PYTHON_TESTS(['test_pytalloc.py'])
--    print("python testsuite returned %d" % pyret)
--    sys.exit(ret or magic_ret or pyret)
---- 238,241 ----
-+    print("Skipping talloc tests (cross-compile)")
-+    return 0
+ 
+ 
+ def testonly(ctx):
+     '''run talloc testsuite'''
++    if getattr(ctx.env, 'CROSS_COMPILE', False):
++        print("Skipping talloc tests (cross-compile)")
++        return 0
++
+     import samba_utils
+ 
+     samba_utils.ADD_LD_LIBRARY_PATH('bin/shared')
+@@ -177,16 +183,20 @@
+     print("python testsuite returned %d" % pyret)
+     sys.exit(ret or magic_ret or pyret)
+ 
++
+ # WAF doesn't build the unit tests for this, maybe because they don't link with talloc?
+ # This forces it
+ def test(ctx):
+     Options.commands.append('build')
+     Options.commands.append('testonly')
+ 
++
+ def dist():
+     '''makes a tarball for distribution'''
+     samba_dist.dist()
+ 
++
+ def reconfigure(ctx):
+     '''reconfigure if config scripts have changed'''
+     samba_utils.reconfigure(ctx)
++

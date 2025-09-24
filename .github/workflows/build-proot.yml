@@ -44,9 +44,7 @@ jobs:
           # Find NDK clang
           NDK_DIR=$(ls -d $ANDROID_SDK_ROOT/ndk/* | sort -V | tail -n1)
           TOOLCHAIN=$NDK_DIR/toolchains/llvm/prebuilt/linux-x86_64/bin
-          export CC=$TOOLCHAIN/${TARGET}${API}-clang
-
-          echo "Using compiler: $CC"
+          export CROSS_COMPILE=${TOOLCHAIN}/${TARGET}${API}-
 
           # Make
           make loader.elf loader-m32.elf build.h

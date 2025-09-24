@@ -31,6 +31,7 @@ jobs:
 
           mkdir -p ${{ env.PREFIX }}
           mkdir -p ${{ env.DWNLD }}
+          cp overrides/*.diff ${{ env.DWNLD }}/
           cd ${{ env.DWNLD }}
 
           # libarchive
@@ -78,8 +79,10 @@ jobs:
           ln -sf ${TOOLCHAIN}/bin/llvm-strip ${TOOLCHAIN}/bin/${TARGET}${API}-strip
 
           # talloc
+
           cd $DWNLD/talloc
-          ./configure --host $TARGET --prefix=$PREFIX #--cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot"
+          patch -p0 < $DWNLD/talloc.diff
+          ./configure --host $TARGET --prefix=$PREFIX --cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot"
           make
           make install
 

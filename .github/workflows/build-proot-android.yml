@@ -78,9 +78,10 @@ jobs:
           make
           make install
 
+          export CPPFLAGS="-UHAVE_ANDROID_LF"
           cd $DWNLD/libarchive
           sh ./build/autogen.sh
-          CPPFLAGS="-UHAVE_ANDROID_LF" ./configure --host=$TARGET --prefix=$PREFIX \
+          ./configure --host=$TARGET --prefix=$PREFIX \
             --without-xml2 \
             --without-openssl \
             --without-nettle \

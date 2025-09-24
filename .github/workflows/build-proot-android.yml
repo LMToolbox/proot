@@ -26,7 +26,7 @@ jobs:
 
       - name: Download dependencies
         run: |
-          apt-get install -y autoconf automake libtool pkg-config
+          sudo apt-get install -y autoconf automake libtool pkg-config
 
           mkdir -p ${{ env.PREFIX }}
           mkdir -p ${{ env.DWNLD }}

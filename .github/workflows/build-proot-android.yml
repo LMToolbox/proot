@@ -76,17 +76,14 @@ jobs:
           ln -sf ${TOOLCHAIN}/bin/llvm-strip ${TOOLCHAIN}/bin/${TARGET}${API}-strip
 
           # talloc
-          export b_ac_cv_sizeof_off_t=$ac_cv_sizeof_off_t
-          export b_ac_cv_file_offset_bits=$ac_cv_file_offset_bits
-          export ac_cv_sizeof_off_t=8
-          export ac_cv_file_offset_bits=64
+          export B_CFLAGS=$CFLAGS
+          export CFLAGS="-D_FILE_OFFSET_BITS=64 -D_LARGE_FILES -I$PREFIX/include"
           cd $DWNLD/samba/lib/talloc
           ./configure --host $TARGET --prefix=$PREFIX --cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot"
           make
           make install
-          export ac_cv_sizeof_off_t=$b_ac_cv_sizeof_off_t
-          export ac_cv_file_offset_bits=$b_ac_cv_file_offset_bits
-
+          export CFLAGS=$B_CFLAGS
+          
           # libarchive
           cd $DWNLD/zlib
           ./configure --prefix=$PREFIX --static

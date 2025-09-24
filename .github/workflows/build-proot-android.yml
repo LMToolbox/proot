@@ -31,20 +31,24 @@ jobs:
 
           mkdir -p ${{ env.PREFIX }}
           mkdir -p ${{ env.DWNLD }}
-          cp patches/*.patch ${{ env.DWNLD }}/
+          export PATCHES_DIR=$(realpath patches)
           cd ${{ env.DWNLD }}
 
           # libarchive
           git clone https://github.com/libarchive/libarchive.git -b v3.8.1
+          cp $PATCHES_DIR/libarchive/*.patch libarchive/ 2>/dev/null || true
           git clone https://github.com/madler/zlib.git -b v1.3.1
+          cp $PATCHES_DIR/zlib/*.patch zlib/ 2>/dev/null || true
 
           # talloc
           curl -LO https://www.samba.org/ftp/talloc/talloc-2.4.3.tar.gz
           tar xzf talloc-2.4.3.tar.gz
           mv talloc-2.4.3 talloc
-          
+          cp $PATCHES_DIR/talloc/*.patch talloc/ 2>/dev/null || true
+
           # uthash
           git clone https://github.com/troydhanson/uthash.git -b v2.3.0
+          cp $PATCHES_DIR/uthash/*.patch uthash/ 2>/dev/null || true
 
           git clone https://github.com/proot-me/proot.git
 
@@ -78,21 +82,30 @@ jobs:
           ln -sf ${TOOLCHAIN}/bin/${TARGET}${API}-clang++ ${TOOLCHAIN}/bin/${TARGET}${API}-g++
           ln -sf ${TOOLCHAIN}/bin/llvm-strip ${TOOLCHAIN}/bin/${TARGET}${API}-strip
 
-          # talloc
+          apply_patches() {
+            for p in *.patch; do
+              [ -f "$p" ] || continue
+              echo "Applying patch $p"
+              patch -p1 < "$p"
+            done
+          }
 
+          # talloc
           cd $DWNLD/talloc
-          patch -p0 < $DWNLD/talloc.patch
+          apply_patches
           ./configure --host $TARGET --prefix=$PREFIX --cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot"
           make
           make install
 
           # libarchive
           cd $DWNLD/zlib
+          apply_patches
           ./configure --prefix=$PREFIX --static
           make
           make install
 
           cd $DWNLD/libarchive
+          apply_patches
           for f in libarchive/archive.h libarchive/archive_entry.h; do # patch to remove android_lf.h include
               sed -i 's|#include "android_lf.h"|/* removed android_lf.h */|' "$f"
           done
@@ -117,6 +130,7 @@ jobs:
 
           # uthash
           cd $DWNLD/uthash
+          apply_patches
           mkdir -p $PREFIX/include/
           cp -r src/* $PREFIX/include/
 

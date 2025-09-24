@@ -26,6 +26,8 @@ jobs:
 
       - name: Download dependencies
         run: |
+          apt-get install -y autoconf automake libtool pkg-config
+
           mkdir -p ${{ env.PREFIX }}
           mkdir -p ${{ env.DWNLD }}
           cd ${{ env.DWNLD }}
@@ -64,7 +66,7 @@ jobs:
           export PREFIX=$(realpath $PREFIX)
           # libarchive
           cd $DWNLD/libarchive
-          # Configure and build.
+          sh ./build/autogen.sh
           ./configure --host $TARGET --prefix=$PREFIX
           make
           make install

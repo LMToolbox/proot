@@ -37,9 +37,7 @@ jobs:
           git clone https://github.com/madler/zlib.git -b v1.3.1
 
           # talloc
-          curl -LO https://www.samba.org/ftp/talloc/talloc-2.4.3.tar.gz
-          tar xzf talloc-2.4.3.tar.gz
-          mv talloc-2.4.3 talloc
+          git clone https://gitlab.com/samba-team/samba -b talloc-2.4.3
           
           # uthash
           git clone https://github.com/troydhanson/uthash.git -b v2.3.0
@@ -57,7 +55,6 @@ jobs:
           export TOOLCHAIN=$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64
           export TARGET=$ARCH-linux-android
           export API=24
-
 
           export DWNLD=$(realpath $DWNLD)
           export PREFIX=$(realpath $PREFIX)
@@ -107,8 +104,8 @@ jobs:
           cd ..
 
           # talloc
-          cd $DWNLD/talloc
-          ./configure --host $TARGET --prefix=$PREFIX CC=$TOOLCHAIN/bin/$TARGET$API-gcc CXX=$TOOLCHAIN/bin/$TARGET$API-g++
+          cd $DWNLD/samba/lib/talloc
+          ./configure --host $TARGET --prefix=$PREFIX 
           make
           make install
 
@@ -118,6 +115,7 @@ jobs:
           cp -r src/* $PREFIX/include/
 
 
+          export CROSS_COMPILE="${TOOLCHAIN}/bin/${TARGET}${API}-"
 
           cd $DWNLD/proot/src
           make loader.elf loader-m32.elf build.h

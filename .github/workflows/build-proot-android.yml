@@ -90,13 +90,6 @@ jobs:
             done
           }
 
-          # talloc
-          cd $DWNLD/talloc
-          apply_patches
-          ./configure --host $TARGET --prefix=$PREFIX #--cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot"
-          make
-          make install
-
           # libarchive
           cd $DWNLD/zlib
           apply_patches
@@ -106,9 +99,6 @@ jobs:
 
           cd $DWNLD/libarchive
           apply_patches
-          for f in libarchive/archive.h libarchive/archive_entry.h; do # patch to remove android_lf.h include
-              sed -i 's|#include "android_lf.h"|/* removed android_lf.h */|' "$f"
-          done
           sh ./build/autogen.sh
           ./configure --host=$TARGET --prefix=$PREFIX \
             --without-xml2 \
@@ -127,6 +117,13 @@ jobs:
           make
           make install
           cd ..
+
+          # talloc
+          cd $DWNLD/talloc
+          apply_patches
+          ./configure --host $TARGET --prefix=$PREFIX --cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot"
+          make
+          make install
 
           # uthash
           cd $DWNLD/uthash

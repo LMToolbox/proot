@@ -1,0 +1,14 @@
+--- libarchive/archive_entry.h.orig	2025-06-01 21:26:44.000000000 +0200
++++ libarchive/archive_entry.h	2025-09-25 01:41:31.572224657 +0200
+@@ -126,11 +126,6 @@
+ #define __LA_INO_T la_uint64_t
+ #endif
+ 
+-/* Large file support for Android */
+-#if defined(__LIBARCHIVE_BUILD) && defined(__ANDROID__)
+-#include "android_lf.h"
+-#endif
+-
+ /*
+  * On Windows, define LIBARCHIVE_STATIC if you're building or using a
+  * .lib.  The default here assumes you're building a DLL.  Only

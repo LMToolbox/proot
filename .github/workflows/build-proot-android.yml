@@ -26,8 +26,6 @@ jobs:
 
       - name: Download dependencies
         run: |
-          apk add --no-cache git curl autoconf automake make pkgconf
-
           mkdir -p /tmp/libs/installed
           cd /tmp/libs
           # libarchive

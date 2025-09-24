@@ -78,8 +78,8 @@ jobs:
           make
           make install
 
-          export CPPFLAGS="-UHAVE_ANDROID_LF"
           cd $DWNLD/libarchive
+          sed -i 's|#include "android_lf.h"|/* removed android_lf.h */|' libarchive/archive.h
           sh ./build/autogen.sh
           ./configure --host=$TARGET --prefix=$PREFIX \
             --without-xml2 \

@@ -20,7 +20,7 @@ jobs:
           packages: 'ndk;28.2.13676358'
 
       - name: Install build tools
-        run: sudo apt-get update && sudo apt-get install -y make git libtalloc-dev libarchive-dev uthash-dev
+        run: sudo apt-get update && sudo apt-get install -y make git
 
       - name: Clone PRoot
         run: git clone https://github.com/proot-me/proot -b master
@@ -45,6 +45,10 @@ jobs:
           NDK_DIR=$(ls -d $ANDROID_SDK_ROOT/ndk/* | sort -V | tail -n1)
           TOOLCHAIN=$NDK_DIR/toolchains/llvm/prebuilt/linux-x86_64/bin
           export CROSS_COMPILE=${TOOLCHAIN}/${TARGET}${API}-
+
+          # Symlink gcc and g++
+          ln -sf ${TOOLCHAIN}/${TARGET}${API}-clang  ${TOOLCHAIN}/${TARGET}${API}-gcc
+          ln -sf ${TOOLCHAIN}/${TARGET}${API}-clang++ ${TOOLCHAIN}/${TARGET}${API}-g++
 
           # Make
           make loader.elf loader-m32.elf build.h

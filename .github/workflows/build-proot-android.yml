@@ -23,19 +23,21 @@ jobs:
       #     apt-get update
       #     apt-get install -y git curl wget tar qemu-user-static build-essential cmake autoconf automake libtool pkg-config
 
-      # - name: Download dependencies
-      #   run: |
-      #     mkdir -p deps
-      #     cd deps
-      #     # libarchive
-      #     git clone https://github.com/libarchive/libarchive.git -b v3.8.1
-      #     # talloc
-      #     curl -LO https://www.samba.org/ftp/talloc/talloc-2.4.3.tar.gz
-      #     tar xzf talloc-2.4.3.tar.gz
-      #     mv talloc-2.4.3 talloc
-      #     # uthash
-      #     git clone https://github.com/troydhanson/uthash.git -b v2.3.0
+      - name: Download dependencies
+        run: |
+          # mkdir -p deps
+          # cd deps
+          # # libarchive
+          # git clone https://github.com/libarchive/libarchive.git -b v3.8.1
+          # # talloc
+          # curl -LO https://www.samba.org/ftp/talloc/talloc-2.4.3.tar.gz
+          # tar xzf talloc-2.4.3.tar.gz
+          # mv talloc-2.4.3 talloc
+          # # uthash
+          # git clone https://github.com/troydhanson/uthash.git -b v2.3.0
 
+          git clone https://github.com/proot-me/proot.git
+          
       # - name: Setup standalone toolchain
       #   run: |
       #     ARCH=${{ matrix.arch }}

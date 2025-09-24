@@ -71,7 +71,36 @@ jobs:
           # libarchive
           cd $DWNLD/libarchive
           sh ./build/autogen.sh
-          ./configure --host $TARGET --prefix=$PREFIX --disable-lzma --disable-bz2 --disable-lz4 --disable-zstd --without-xml2 --enable-static --disable-shared
+          ./configure --host=$TARGET --prefix=$PREFIX \
+          --disable-lzma \
+          --disable-bz2 \
+          --disable-lz4 \
+          --disable-zstd \
+          --disable-xattr \
+          --disable-acl \
+          --disable-iconv \
+          --disable-expat \
+          --disable-cng \
+          --disable-nettle \
+          --disable-openssl \
+          --disable-xml2 \
+          --disable-cng \
+          --disable-xar \
+          --disable-cpio \
+          --disable-shared \
+          --enable-static \
+          --without-xml2 \
+          --without-openssl \
+          --without-nettle \
+          --without-expat \
+          --without-iconv \
+          --without-zlib \
+          --without-bz2lib \
+          --without-lzma \
+          --without-lz4 \
+          --without-zstd \
+          --without-xattr \
+          --without-acl
           make
           make install
           cd ..

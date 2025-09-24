@@ -51,7 +51,7 @@ jobs:
               ;;
           esac
           
-          NDK_DIR=$(find "$ANDROID_SDK_ROOT/ndk" -maxdepth 1 -type d | tail -n +2)
+          NDK_DIR=$(ls -d "$ANDROID_SDK_ROOT/ndk/"*/ | sort -V | tail -n1)
           TOOLCHAIN="$NDK_DIR/toolchains/llvm/prebuilt/linux-x86_64/bin"
 
           CC=$TOOLCHAIN/${TARGET}24-clang

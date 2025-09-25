@@ -121,6 +121,8 @@ jobs:
           # talloc
           cd $DWNLD/talloc
           apply_patches
+          sudo chown -R $USER:$USER /home/runner/work/proot/proot/dependencies/download/talloc/
+          sudo chown -R $USER:$USER /usr/bin/pytho*
           ./configure --host $TARGET --prefix=$PREFIX --cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot"
           make
           make install

@@ -128,12 +128,15 @@ jobs:
 
           # talloc
           cd $DWNLD/talloc
+          export B_CFLAGS=$CFLAGS
+          export CFLAGS="-std=gnu89 $CFLAGS"
           apply_patches
           python -m venv .venv
           . .venv/bin/activate
           ./configure --host $TARGET --prefix=$PREFIX --cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot"
           make
           make install
+          export CFLAGS=$B_CFLAGS
 
           # uthash
           cd $DWNLD/uthash

@@ -49,7 +49,7 @@ jobs:
           cp $PATCHES_DIR/zlib/*.patch zlib/ 2>/dev/null || true
 
           # talloc
-          git clone https://github.com/python/cpython -b 3.13.7
+          git clone https://github.com/python/cpython -b v3.13.7
           cp $PATCHES_DIR/python/*.patch libarchive/ 2>/dev/null || true
           curl -LO https://www.samba.org/ftp/talloc/talloc-2.4.3.tar.gz
           tar xzf talloc-2.4.3.tar.gz

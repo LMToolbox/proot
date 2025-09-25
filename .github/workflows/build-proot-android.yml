@@ -128,28 +128,27 @@ jobs:
 
           # talloc
           cd $DWNLD/talloc
-          export B_CFLAGS=$CFLAGS
-          export CFLAGS="-std=gnu89 $CFLAGS"
           apply_patches
           python -m venv .venv
           . .venv/bin/activate
           ./configure --host $TARGET --prefix=$PREFIX --cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot"
           make
           make install
-          export CFLAGS=$B_CFLAGS
 
           # uthash
           cd $DWNLD/uthash
           apply_patches
           mkdir -p $PREFIX/include/
           cp -r src/* $PREFIX/include/
-          
 
           export CROSS_COMPILE="${TOOLCHAIN}/bin/${TARGET}${API}-"
 
           cd $DWNLD/proot/src
+          export B_CFLAGS=$CFLAGS
+          export CFLAGS="-std=gnu89 $CFLAGS"
           make loader.elf loader-m32.elf build.h
           make proot care
+          export CFLAGS=$B_CFLAGS
 
           mkdir -p ../../dist/$ARCH
           cp proot ../../dist/$ARCH/

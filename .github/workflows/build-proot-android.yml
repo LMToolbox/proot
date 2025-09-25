@@ -120,9 +120,8 @@ jobs:
 
           # talloc
           cd $DWNLD/talloc
-          mkdir -p bin/c4che/sambadeps
           apply_patches
-          sudo ./configure --host $TARGET --prefix=$PREFIX --cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot"
+          ./configure --host $TARGET --prefix=$PREFIX --cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot"
           make
           make install
 

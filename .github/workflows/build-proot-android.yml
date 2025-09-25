@@ -24,10 +24,15 @@ jobs:
         with:
           ndk-version: r28c
 
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
       - name: Download dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y autoconf automake libtool pkg-config qemu-user-static python3-dev
+          sudo apt-get install -y autoconf automake libtool pkg-config qemu-user-static
 
           mkdir -p ${{ env.PREFIX }}
           mkdir -p ${{ env.DWNLD }}
@@ -45,6 +50,7 @@ jobs:
           tar xzf talloc-2.4.3.tar.gz
           mv talloc-2.4.3 talloc
           cp $PATCHES_DIR/talloc/*.patch talloc/ 2>/dev/null || true
+
 
           # uthash
           git clone https://github.com/troydhanson/uthash.git -b v2.3.0
@@ -121,8 +127,6 @@ jobs:
           # talloc
           cd $DWNLD/talloc
           apply_patches
-          sudo chown -R $USER:$USER /home/runner/work/proot/proot/dependencies/download/talloc/
-          sudo chown -R $USER:$USER /usr/bin/pytho*
           ./configure --host $TARGET --prefix=$PREFIX --cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot"
           make
           make install

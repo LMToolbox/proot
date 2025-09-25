@@ -37,9 +37,6 @@ jobs:
 
       - name: Download dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y autoconf automake libtool pkg-config qemu-user-static
-
           mkdir -p ${{ env.PREFIX }}
           mkdir -p ${{ env.DWNLD }}
           export PATCHES_DIR=$(realpath patches)
@@ -71,6 +68,9 @@ jobs:
           PREFIX: ${{ env.PREFIX }}
           DWNLD: ${{ env.DWNLD }}
         run: |
+          sudo apt-get update
+          sudo apt-get install -y autoconf automake libtool pkg-config
+
           export ENV_SET=$(realpath ./set-envs.sh)
           . $ENV_SET
           
@@ -118,23 +118,23 @@ jobs:
           cd $DWNLD/talloc
           apply_patches
           if [ "$ARCH" = "aarch64" ]; then
+            cp $ENV_SET .
             echo "Running in Docker with QEMU emulation for ARM64"
             docker run --rm -t --platform linux/arm64 \
               -v "$PWD":/workspace \
               -w /workspace \
-              -e ENV_SET="$ENV_SET" \
               -e ANDROID_NDK="$ANDROID_NDK" \
               -e ARCH="$ARCH" \
               -e PREFIX="$PREFIX" \
               -e DWNLD="$DWNLD" \
               ubuntu:24.04 bash -c "
-                . $ENV_SET &&
+                . ./set-envs.sh &&
                 apt-get update &&
-                apt-get install -y python3 python3-venv &&
+                apt-get install -y build-essential autoconf automake libtool pkg-config python3 python3-venv &&
                 python3 -m venv ./venv &&
-                . ./myenv/bin/activate &&
-                ./configure --host $TARGET --prefix=$PREFIX
-                make
+                . ./venv/bin/activate &&
+                ./configure --host $TARGET --prefix=$PREFIX &&
+                make &&
                 make install
               "
           else

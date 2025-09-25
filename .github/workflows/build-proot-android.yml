@@ -28,6 +28,7 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: '3.13'
+          architecture: ${{ matrix.arch == 'aarch64' && 'arm64' || (matrix.arch == 'x86_64' && 'x64' || matrix.arch) }}
 
       - name: Download dependencies
         run: |
@@ -127,7 +128,7 @@ jobs:
           # talloc
           cd $DWNLD/talloc
           apply_patches
-          ./configure --host $TARGET --prefix=$PREFIX --cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot"
+          ./configure --host $TARGET --prefix=$PREFIX --bundled-libraries=ALL --cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot"
           make
           make install
 

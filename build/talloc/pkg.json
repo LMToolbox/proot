@@ -1,0 +1,22 @@
+{
+    "comment": "Required by PROOT",
+
+    "download": {
+
+        "url": "https://www.samba.org/ftp/talloc/talloc-2.4.3.tar.gz"
+
+    },
+    "build": {
+        "configure": [
+            "./configure",
+            "--host=$TARGET --prefix=$PREFIX",
+            "--cross-compile --cross-execute='qemu-$ARCH-static -L $TOOLCHAIN/sysroot'",
+            "--bundled-libraries=ALL",
+            "LDFLAGS='$LDFLAGS -lpython3.13'"
+        ],
+       "make": [
+            "make",
+            "make install"
+       ]
+    }
+}

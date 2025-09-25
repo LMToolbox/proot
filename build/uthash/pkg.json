@@ -1,0 +1,17 @@
+{
+    "comment": "Required by PROOT",
+
+    "download": {
+        "branch": "2.3.0",
+
+        "url": "https://github.com/troydhanson/uthash.git"
+    },
+    "build": {
+        "configure": [
+            "mkdir -p $PREFIX/include/"
+        ],
+       "make": [
+            "cp -r src/* $PREFIX/include/"
+       ]
+    }
+}

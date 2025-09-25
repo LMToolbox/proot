@@ -1,0 +1,24 @@
+{
+    "comment": "Required by talloc",
+
+    "download": {
+        "branch": "v3.12.7",
+        "url": "https://github.com/python/cpython.git"
+    },
+    "build": {
+        "configure": [
+            "./configure",
+            "--prefix=${PREFIX}",
+            "--enable-shared",
+            "--without-ensurepip",
+            "--build=$(gcc -dumpmachine)", 
+            "--host=$TARGET",
+            "--with-build-python=$(which python3)",
+            "LDFLAGS='$LDFLAGS -lz'"
+        ],
+       "make": [
+            "make",
+            "make install"
+       ]
+    }
+}

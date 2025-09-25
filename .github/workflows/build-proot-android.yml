@@ -3,9 +3,6 @@ name: Build PRoot for Android
 on:
   workflow_dispatch:
 
-env:
-  PREFIX: ./dependencies/install
-  DWNLD: ./dependencies/download
 jobs:
   build:
     strategy:
@@ -35,142 +32,21 @@ jobs:
         with:
           platforms: arm64
 
-      - name: Download dependencies
-        run: |
-          mkdir -p ${{ env.PREFIX }}
-          mkdir -p ${{ env.DWNLD }}
-          export PATCHES_DIR=$(realpath patches)
-          cd ${{ env.DWNLD }}
 
-          # zlib, required by libarchive, python
-          git clone https://github.com/madler/zlib.git -b v1.3.1
-          cp $PATCHES_DIR/zlib/*.patch zlib/ 2>/dev/null || true
-
-          # cpython, required by talloc
-          git clone https://github.com/python/cpython -b v3.13.7
-          cp $PATCHES_DIR/cpython/*.patch libarchive/ 2>/dev/null || true
-
-          # libarchive
-          git clone https://github.com/libarchive/libarchive.git -b v3.8.1
-          cp $PATCHES_DIR/libarchive/*.patch libarchive/ 2>/dev/null || true
-
-          # talloc
-          curl -LO https://www.samba.org/ftp/talloc/talloc-2.4.3.tar.gz
-          tar xzf talloc-2.4.3.tar.gz
-          mv talloc-2.4.3 talloc
-          cp $PATCHES_DIR/talloc/*.patch talloc/ 2>/dev/null || true
-
-          # uthash
-          git clone https://github.com/troydhanson/uthash.git -b v2.3.0
-          cp $PATCHES_DIR/uthash/*.patch uthash/ 2>/dev/null || true
-
-          git clone https://github.com/proot-me/proot.git
-
-      - name: Build dependencies
-        env:
-          ANDROID_NDK: ${{ steps.setup-ndk.outputs.ndk-path }}
-          ARCH: ${{ matrix.arch }}
-          PREFIX: ${{ env.PREFIX }}
-          DWNLD: ${{ env.DWNLD }}
+      - name: Ubuntu setup
         run: |
           sudo apt-get update
-          sudo apt-get install -y autoconf automake libtool pkg-config qemu-user-static
+          sudo apt-get install -y git curl jq autoconf automake libtool pkg-config qemu-user-static unzip
 
-          cp -r "$ANDROID_NDK" ./ndk
-          export ANDROID_NDK=$(realpath ./ndk)
-          WORKDIR=$(realpath .)
-          
-          export ENV_SET=$(realpath ./set-envs.sh)
-          . $ENV_SET
+      - name: Download all sources
+        run: |
+          chmod +x ./scripts/download_all.sh
+          ./scripts/download_all.sh
 
-          ln -sf ${TOOLCHAIN}/bin/${TARGET}${API}-clang ${TOOLCHAIN}/bin/${TARGET}${API}-gcc
-          ln -sf ${TOOLCHAIN}/bin/${TARGET}${API}-clang++ ${TOOLCHAIN}/bin/${TARGET}${API}-g++
-          ln -sf ${TOOLCHAIN}/bin/llvm-strip ${TOOLCHAIN}/bin/${TARGET}${API}-strip
-          ln -sf ${TOOLCHAIN}/bin/llvm-objcopy ${TOOLCHAIN}/bin/${TARGET}${API}-objcopy
-          ln -sf ${TOOLCHAIN}/bin/llvm-objdump ${TOOLCHAIN}/bin/${TARGET}${API}-objdump
-
-          apply_patches() {
-            for p in *.patch; do
-              [ -f "$p" ] || continue
-              echo "Applying patch $p"
-              patch -p0 < "$p"
-            done
-          }
-
-          # libarchive
-          cd $DWNLD/zlib
-          apply_patches
-          export B_CFLAGS=$CFLAGS
-          export CFLAGS="-fPIC $CFLAGS"
-          ./configure --prefix=$PREFIX --static
-          make
-          make install
-          export CFLAGS=$B_CFLAGS
-
-          cd $DWNLD/libarchive
-          apply_patches
-          sh ./build/autogen.sh
-          ./configure --host=$TARGET --prefix=$PREFIX \
-            --without-xml2 \
-            --without-openssl \
-            --without-nettle \
-            --without-expat \
-            --without-iconv \
-            --without-bz2lib \
-            --without-lzma \
-            --without-lz4 \
-            --without-zstd \
-            --without-xattr \
-            --without-acl \
-            --disable-shared \
-            --enable-static
-          make
-          make install
-
-          # talloc
-          export B_LDFLAGS=$LDFLAGS
-          export LDFLAGS="$LDFLAGS -lz"
-          cd $DWNLD/cpython
-          apply_patches
-          ./configure --build=$(gcc -dumpmachine) --host=$TARGET --prefix=$PREFIX --with-build-python=$(which python3)
-          make
-          make install
-          export LDFLAGS=$B_LDFLAGS
-
-          export B_LDFLAGS=$LDFLAGS
-          export LDFLAGS="$LDFLAGS -lpython3.13"
-          cd $DWNLD/talloc
-          apply_patches
-          ./configure \
-            --host=$TARGET --prefix=$PREFIX \
-            --cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot" \
-            --bundled-libraries=ALL
-          make
-          make install
-          export LDFLAGS=$B_LDFLAGS
-
-          # uthash
-          cd $DWNLD/uthash
-          apply_patches
-          mkdir -p $PREFIX/include/
-          cp -r src/* $PREFIX/include/
-
-          export CROSS_COMPILE="${TOOLCHAIN}/bin/${TARGET}${API}-"
-
-          cd $DWNLD/proot/src
-          export B_CFLAGS=$CFLAGS
-          export B_LDFLAGS=$LDFLAGS
-          export CFLAGS="-std=gnu89 $CFLAGS"
-          export LDFLAGS="$LDFLAGS -lz"
-          make loader.elf loader-m32.elf build.h
-          make proot care
-          export CFLAGS=$B_CFLAGS
-          export LDFLAGS=$B_LDFLAGS
-
-          DIST_DIR="$WORKDIR/dist/$ARCH"
-          mkdir -p "$DIST_DIR"
-          cp proot "$DIST_DIR/"
-          cp care "$DIST_DIR/"
+      - name: Build all packages
+        run: |
+          chmod +x ./scripts/build_all.sh ./scripts/build_one.sh
+          ./scripts/build_all.sh
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

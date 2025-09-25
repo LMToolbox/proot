@@ -1,0 +1,21 @@
+{
+    "comment": "Required by libarchive, python",
+
+    "download": {
+        "branch": "v1.3.1",
+
+        "method": "git",
+        "url": "https://github.com/madler/zlib.git"
+    },
+    "build": {
+        "configure": [
+            "./configure",
+            "--prefix=${PREFIX}",
+            "CFLAGS='-fPIC $CFLAGS'"
+        ],
+       "make": [
+            "make",
+            "make install"
+       ]
+    }
+}

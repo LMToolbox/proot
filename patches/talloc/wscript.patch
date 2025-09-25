@@ -1,6 +1,20 @@
 --- buildtools/wafsamba/wscript.orig	2024-12-18 10:06:06.072103000 +0100
-+++ buildtools/wafsamba/wscript	2025-09-25 01:36:26.880146914 +0200
-@@ -638,8 +638,8 @@
++++ buildtools/wafsamba/wscript	2025-09-25 02:07:37.289334338 +0200
+@@ -398,6 +398,13 @@
+ 
+     conf.CHECK_UNAME()
+ 
++    orig_check_code = conf.CHECK_CODE
++    def patched_check_code(*k, **kw):
++        if kw.get('execute', False):
++            kw['execute'] = False
++        return orig_check_code(*k, **kw)
++    conf.CHECK_CODE = patched_check_code
++
+     # see if we can compile and run a simple C program
+     conf.CHECK_CODE('printf("hello world")',
+                     define='HAVE_SIMPLE_C_PROG',
+@@ -638,8 +645,8 @@
      conf.CHECK_HEADERS('limits.h assert.h')
  
      # see if we need special largefile flags

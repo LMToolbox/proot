@@ -123,7 +123,7 @@ jobs:
           # talloc
           cd $DWNLD/cpython
           apply_patches
-          ./configure --host=$TARGET --prefix=$PREFIX --enable-optimizations
+          ./configure --build=$(gcc -dumpmachine) --host=$TARGET --prefix=$PREFIX --with-build-python=$(which python3) --enable-optimizations
           make
           make install
 

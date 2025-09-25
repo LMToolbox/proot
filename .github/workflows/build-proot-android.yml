@@ -27,7 +27,7 @@ jobs:
       - name: Download dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y autoconf automake libtool pkg-config qemu-user-static
+          sudo apt-get install -y autoconf automake libtool pkg-config qemu-user-static python3-dev
 
           mkdir -p ${{ env.PREFIX }}
           mkdir -p ${{ env.DWNLD }}
@@ -120,8 +120,9 @@ jobs:
 
           # talloc
           cd $DWNLD/talloc
+          mkdir -p bin/c4che/sambadeps
           apply_patches
-          sudo ./configure --host $TARGET --prefix=$PREFIX --cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot"
+          ./configure --host $TARGET --prefix=$PREFIX --cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot"
           make
           make install
 

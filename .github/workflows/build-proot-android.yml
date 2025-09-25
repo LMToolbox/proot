@@ -50,7 +50,7 @@ jobs:
 
           # talloc
           git clone https://github.com/python/cpython -b v3.13.7
-          cp $PATCHES_DIR/python/*.patch libarchive/ 2>/dev/null || true
+          cp $PATCHES_DIR/cpython/*.patch libarchive/ 2>/dev/null || true
           curl -LO https://www.samba.org/ftp/talloc/talloc-2.4.3.tar.gz
           tar xzf talloc-2.4.3.tar.gz
           mv talloc-2.4.3 talloc
@@ -121,7 +121,7 @@ jobs:
           make install
 
           # talloc
-          cd $DWNLD/python
+          cd $DWNLD/cpython
           apply_patches
           ./configure --host=$TARGET --prefix=$PREFIX --enable-optimizations
           make

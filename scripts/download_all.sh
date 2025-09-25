@@ -4,7 +4,7 @@
 
 set -e
 
-ROOTDIR="$(dirname "$0")/.."
+ROOTDIR="$(realpath "$(dirname "$0")/..")"
 BUILDDIR="$ROOTDIR/build"
 QUEUE="$BUILDDIR/queue.txt"
 

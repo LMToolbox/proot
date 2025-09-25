@@ -4,10 +4,7 @@
 # Usage: ./build_one.sh <package_dir>
 # Handles patching, configure/build, and export.
 
-
 set -e
-
-
 
 PKGDIR="$1"
 if [ -z "$PKGDIR" ]; then
@@ -26,7 +23,6 @@ fi
 export PREFIX=$(realpath "$PREFIX")
 
 # Apply all patches if present
-echo "Applying patches in $PKGDIR..."
 for p in *.patch; do
   [ -f "$p" ] || continue
   echo "Applying patch $p"

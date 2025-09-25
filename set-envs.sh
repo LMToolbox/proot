@@ -16,4 +16,4 @@ export STRIP=$TOOLCHAIN/bin/llvm-strip
 export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH"
 
 export CFLAGS="-I$PREFIX/include"
-export LDFLAGS="-L$PREFIX/lib -static"
+export LDFLAGS="-L$PREFIX/lib"

@@ -72,7 +72,7 @@ jobs:
           DWNLD: ${{ env.DWNLD }}
         run: |
           export ENV_SET=$(realpath ./set-envs.sh)
-          sh \$ENV_SET
+          sh $ENV_SET
           
           ln -sf ${TOOLCHAIN}/bin/${TARGET}${API}-clang ${TOOLCHAIN}/bin/${TARGET}${API}-gcc
           ln -sf ${TOOLCHAIN}/bin/${TARGET}${API}-clang++ ${TOOLCHAIN}/bin/${TARGET}${API}-g++
@@ -128,7 +128,7 @@ jobs:
               -e PREFIX="$PREFIX" \
               -e DWNLD="$DWNLD" \
               ubuntu:24.04 bash -c "
-                sh \$ENV_SET &&
+                sh $ENV_SET &&
                 apt-get update &&
                 apt-get install -y python3 python3-venv &&
                 python3 -m venv ./venv &&

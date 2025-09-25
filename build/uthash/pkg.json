@@ -8,10 +8,12 @@
     },
     "build": {
         "configure": [
-            "mkdir -p $PREFIX/include/"
+            "mkdir -p $PREFIX/include/",
+"ls"
         ],
        "make": [
-            "cp -r src/*.h $PREFIX/include/"
+"ls",
+            "cp -r src/*.h $PREFIX/include/",
        ]
     }
 }

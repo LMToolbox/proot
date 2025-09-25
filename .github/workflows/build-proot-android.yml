@@ -42,15 +42,19 @@ jobs:
           export PATCHES_DIR=$(realpath patches)
           cd ${{ env.DWNLD }}
 
-          # libarchive
-          git clone https://github.com/libarchive/libarchive.git -b v3.8.1
-          cp $PATCHES_DIR/libarchive/*.patch libarchive/ 2>/dev/null || true
+          # zlib, required by libarchive, python
           git clone https://github.com/madler/zlib.git -b v1.3.1
           cp $PATCHES_DIR/zlib/*.patch zlib/ 2>/dev/null || true
 
-          # talloc
+          # cpython, required by talloc
           git clone https://github.com/python/cpython -b v3.13.7
           cp $PATCHES_DIR/cpython/*.patch libarchive/ 2>/dev/null || true
+
+          # libarchive
+          git clone https://github.com/libarchive/libarchive.git -b v3.8.1
+          cp $PATCHES_DIR/libarchive/*.patch libarchive/ 2>/dev/null || true
+
+          # talloc
           curl -LO https://www.samba.org/ftp/talloc/talloc-2.4.3.tar.gz
           tar xzf talloc-2.4.3.tar.gz
           mv talloc-2.4.3 talloc
@@ -96,9 +100,12 @@ jobs:
           # libarchive
           cd $DWNLD/zlib
           apply_patches
+          export B_CFLAGS=$CFLAGS
+          export CFLAGS="-fPIC $CFLAGS"
           ./configure --prefix=$PREFIX --static
           make
           make install
+          export CFLAGS=$B_CFLAGS
 
           cd $DWNLD/libarchive
           apply_patches

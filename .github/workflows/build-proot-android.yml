@@ -127,7 +127,9 @@ jobs:
           # talloc
           cd $DWNLD/talloc
           apply_patches
-          ./configure --host $TARGET --prefix=$PREFIX --bundled-libraries=ALL --cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot"
+          python -m venv .venv
+          . .venv/bin/activate
+          ./configure --host $TARGET --prefix=$PREFIX --cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot"
           make
           make install
 
@@ -136,7 +138,7 @@ jobs:
           apply_patches
           mkdir -p $PREFIX/include/
           cp -r src/* $PREFIX/include/
-
+          
 
           export CROSS_COMPILE="${TOOLCHAIN}/bin/${TARGET}${API}-"
 

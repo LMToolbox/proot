@@ -125,7 +125,7 @@ jobs:
             echo "Running in Docker with QEMU emulation for ARM64"
             docker run --rm -t --platform linux/arm64 \
               -v "$PWD":/workspace \
-              -v "$ANDROID_NDK":"$ANDROID_NDK" \    # <-- NDK mount
+              -v "$(realpath $ANDROID_NDK)":"$(realpath $ANDROID_NDK)" \    # <-- NDK mount
               -w /workspace \
               -e ANDROID_NDK="$ANDROID_NDK" \
               -e ARCH="$ARCH" \

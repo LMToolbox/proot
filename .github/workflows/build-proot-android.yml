@@ -27,7 +27,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.13'
+          python-version: '3.13.7'
 
       - name: Set up QEMU
         if: matrix.arch == 'aarch64'
@@ -49,11 +49,12 @@ jobs:
           cp $PATCHES_DIR/zlib/*.patch zlib/ 2>/dev/null || true
 
           # talloc
+          git clone https://github.com/python/cpython -b 3.13.7
+          cp $PATCHES_DIR/python/*.patch libarchive/ 2>/dev/null || true
           curl -LO https://www.samba.org/ftp/talloc/talloc-2.4.3.tar.gz
           tar xzf talloc-2.4.3.tar.gz
           mv talloc-2.4.3 talloc
           cp $PATCHES_DIR/talloc/*.patch talloc/ 2>/dev/null || true
-
 
           # uthash
           git clone https://github.com/troydhanson/uthash.git -b v2.3.0
@@ -120,16 +121,23 @@ jobs:
           make install
 
           # talloc
+          cd $DWNLD/python
+          apply_patches
+          ./configure --host=$TARGET --prefix=$PREFIX --enable-optimizations
+          make
+          make install
+
+          export B_LDFLAGS=$LDFLAGS
+          export LDFLAGS="$LDFLAGS -lpython3.13"
           cd $DWNLD/talloc
           apply_patches
-          python3 -m venv .venv
-          . .venv/bin/activate
-          PYTHON_VERSION='3.13' PYTAG='cpython313' pyext_PATTERN="%s.so" PYTHON_LDFLAGS='-lpthread -ldl' ./configure \
+          ./configure \
             --host=$TARGET --prefix=$PREFIX \
             --cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot" \
             --bundled-libraries=ALL
-            make
-            make install
+          make
+          make install
+          export LDFLAGS=$B_LDFLAGS
 
           # uthash
           cd $DWNLD/uthash

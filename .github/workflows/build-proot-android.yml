@@ -158,11 +158,14 @@ jobs:
 
           cd $DWNLD/proot/src
           export B_CFLAGS=$CFLAGS
+          export B_LDFLAGS=$LDFLAGS
           export CFLAGS="-std=gnu89 $CFLAGS"
+          export LDFLAGS="$LDFLAGS -lz"
           make loader.elf loader-m32.elf build.h
           make proot care
           export CFLAGS=$B_CFLAGS
-
+          export LDFLAGS=$B_LDFLAGS
+          
           mkdir -p ../../dist/$ARCH
           cp proot ../../dist/$ARCH/
           cp care ../../dist/$ARCH/

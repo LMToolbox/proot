@@ -122,29 +122,12 @@ jobs:
           # talloc
           cd $DWNLD/talloc
           apply_patches
-          if [ "$ARCH" = "aarch64" ]; then
-            cp $ENV_SET .
-            echo "Running in Docker with QEMU emulation for ARM64"
-            docker run --rm -t --platform linux/arm64 \
-              -v "$PWD":/workspace \
-              -v "$ANDROID_NDK":"$ANDROID_NDK" \
-              -w /workspace \
-              ubuntu:24.04 bash -c "
-                export DEBIAN_FRONTEND=noninteractive
-                apt-get update &&
-                apt-get install -y python3 python3-venv &&
-                python3 -m venv .venv
-              "
-          else
-            echo "Running natively on $ARCH"
-            python3 -m venv .venv
-          fi
-          
+          python3 -m venv .venv
           . .venv/bin/activate
-            ./configure \
-              --host=$TARGET --prefix=$PREFIX \
-              --cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot" \
-              --bundled-libraries=ALL
+          PYTHON_VERSION='3.13' PYTAG='cpython313' pyext_PATTERN="%s.so" PYTHON_LDFLAGS='-lpthread -ldl' ./configure \
+            --host=$TARGET --prefix=$PREFIX \
+            --cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot" \
+            --bundled-libraries=ALL
             make
             make install
 

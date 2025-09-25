@@ -29,6 +29,12 @@ jobs:
         with:
           python-version: '3.13'
 
+      - name: Set up QEMU
+        if: matrix.arch == 'aarch64'
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
       - name: Download dependencies
         run: |
           sudo apt-get update
@@ -65,27 +71,9 @@ jobs:
           PREFIX: ${{ env.PREFIX }}
           DWNLD: ${{ env.DWNLD }}
         run: |
-
-          export TOOLCHAIN=$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64
-          export TARGET=$ARCH-linux-android
-          export API=24
-
-          export DWNLD=$(realpath $DWNLD)
-          export PREFIX=$(realpath $PREFIX)
-
-          export AR=$TOOLCHAIN/bin/llvm-ar
-          export CC="$TOOLCHAIN/bin/clang --target=$TARGET$API"
-          export AS=$CC
-          export CXX="$TOOLCHAIN/bin/clang++ --target=$TARGET$API"
-          export LD=$TOOLCHAIN/bin/ld
-          export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
-          export STRIP=$TOOLCHAIN/bin/llvm-strip
-
-          export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:$PKG_CONFIG_PATH"
-
-          export CFLAGS="-I$PREFIX/include"
-          export LDFLAGS="-L$PREFIX/lib"
-
+          export ENV_SET=$(realpath ./set-envs.sh)
+          sh \$ENV_SET
+          
           ln -sf ${TOOLCHAIN}/bin/${TARGET}${API}-clang ${TOOLCHAIN}/bin/${TARGET}${API}-gcc
           ln -sf ${TOOLCHAIN}/bin/${TARGET}${API}-clang++ ${TOOLCHAIN}/bin/${TARGET}${API}-g++
           ln -sf ${TOOLCHAIN}/bin/llvm-strip ${TOOLCHAIN}/bin/${TARGET}${API}-strip
@@ -129,11 +117,34 @@ jobs:
           # talloc
           cd $DWNLD/talloc
           apply_patches
-          python -m venv .venv
-          . .venv/bin/activate
-          ./configure --host $TARGET --prefix=$PREFIX --cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot"
-          make
-          make install
+          if [ "$ARCH" = "aarch64" ]; then
+            echo "Running in Docker with QEMU emulation for ARM64"
+            docker run --rm -t --platform linux/arm64 \
+              -v "$PWD":/workspace \
+              -w /workspace \
+              -e ENV_SET="$ENV_SET" \
+              -e ANDROID_NDK="$ANDROID_NDK" \
+              -e ARCH="$ARCH" \
+              -e PREFIX="$PREFIX" \
+              -e DWNLD="$DWNLD" \
+              ubuntu:24.04 bash -c "
+                sh \$ENV_SET &&
+                apt-get update &&
+                apt-get install -y python3 python3-venv &&
+                python3 -m venv ./venv &&
+                . ./myenv/bin/activate &&
+                ./configure --host $TARGET --prefix=$PREFIX
+                make
+                make install
+              "
+          else
+            echo "Running natively on $ARCH"
+            python3 -m venv .venv
+            . .venv/bin/activate
+            ./configure --host $TARGET --prefix=$PREFIX
+            make
+            make install
+          fi
 
           # uthash
           cd $DWNLD/uthash

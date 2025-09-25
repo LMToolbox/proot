@@ -71,7 +71,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y autoconf automake libtool pkg-config
 
+          cp -r "$ANDROID_NDK" ./ndk
+          export ANDROID_NDK=$(realpath ./ndk)
           WORKDIR=$(realpath .)
+          
           export ENV_SET=$(realpath ./set-envs.sh)
           . $ENV_SET
 
@@ -137,7 +140,10 @@ jobs:
                 apt-get install -y build-essential autoconf automake libtool pkg-config python3 python3-venv &&
                 python3 -m venv ./venv &&
                 . ./venv/bin/activate &&
-                ./configure --host $TARGET --prefix=$PREFIX &&
+                ./configure \
+                  --host=$TARGET \
+                  --prefix=$PREFIX \
+                  --bundled-libraries=ALL &&
                 make &&
                 make install
               "
@@ -145,7 +151,10 @@ jobs:
             echo "Running natively on $ARCH"
             python3 -m venv .venv
             . .venv/bin/activate
-            ./configure --host $TARGET --prefix=$PREFIX
+            ./configure \
+              --host=$TARGET \
+              --prefix=$PREFIX \
+              --bundled-libraries=ALL
             make
             make install
           fi

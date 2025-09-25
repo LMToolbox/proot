@@ -49,11 +49,33 @@ while IFS= read -r pkg; do
               curl -LO "$url"
               # Unpack if archive
               case "$fname" in
-                *.tar.gz|*.tgz) tar xzf "$fname" ; ;;
-                *.tar.bz2) tar xjf "$fname" ; ;;
-                *.tar.xz) tar xJf "$fname" ; ;;
-                *.zip) unzip "$fname" ; ;;
+                *.tar.gz|*.tgz)
+                  tar xzf "$fname"
+                  ;;
+                *.tar.bz2)
+                  tar xjf "$fname"
+                  ;;
+                *.tar.xz)
+                  tar xJf "$fname"
+                  ;;
+                *.zip)
+                  unzip "$fname"
+                  ;;
               esac
+              # Move contents if only one directory was created
+              # Find new directories after extraction
+              new_dirs=$(find . -mindepth 1 -maxdepth 1 -type d | grep -v '^\./\.git$')
+              if [ $(echo "$new_dirs" | wc -l) -eq 1 ]; then
+                onlydir=$(echo "$new_dirs")
+                if [ "$onlydir" != "." ] && [ "$onlydir" != "$PKGDIR" ]; then
+                  echo "Flattening $onlydir into $PKGDIR..."
+                  # Move all contents up
+                  shopt -s dotglob 2>/dev/null || true
+                  mv "$onlydir"/* ./
+                  rmdir "$onlydir"
+                  shopt -u dotglob 2>/dev/null || true
+                fi
+              fi
             fi
           else
             echo "Skipping non-url download entry: $entry"

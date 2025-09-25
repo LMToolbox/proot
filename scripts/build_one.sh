@@ -2,7 +2,7 @@
 
 # Generic build script for a single package based on pkg.json and patches
 # Usage: ./build_one.sh <package_dir>
-# Handles download (git/curl), patching, configure/build, and export.
+# Handles patching, configure/build, and export.
 
 
 set -e
@@ -15,47 +15,6 @@ if [ -z "$PKGDIR" ]; then
 fi
 
 cd "$PKGDIR"
-
-
-# Download sources if 'download' section exists
-if [ -f pkg.json ]; then
-  DOWNLOAD_TYPE=$(jq -r '.download | type' pkg.json 2>/dev/null || echo "none")
-  if [ "$DOWNLOAD_TYPE" = "object" ]; then
-    DOWNLOADS=$(jq -c '.download' pkg.json)
-  elif [ "$DOWNLOAD_TYPE" = "array" ]; then
-    DOWNLOADS=$(jq -c '.download[]?' pkg.json)
-  else
-    DOWNLOADS=""
-  fi
-  if [ -n "$DOWNLOADS" ]; then
-    for entry in $DOWNLOADS; do
-      url=$(echo "$entry" | jq -r '.url // empty')
-      branch=$(echo "$entry" | jq -r '.branch // empty')
-      fname=$(basename "$url")
-      if echo "$url" | grep -q '\.git$'; then
-        # Git repo
-        if [ -n "$branch" ] && [ "$branch" != "null" ]; then
-          echo "Cloning $url (branch: $branch)"
-          git clone --depth 1 -b "$branch" "$url"
-        else
-          echo "Cloning $url (default branch)"
-          git clone --depth 1 "$url"
-        fi
-      else
-        # File download
-        echo "Downloading $url"
-        curl -LO "$url"
-        # Unpack if archive
-        case "$fname" in
-          *.tar.gz|*.tgz) tar xzf "$fname" ; ;;
-          *.tar.bz2) tar xjf "$fname" ; ;;
-          *.tar.xz) tar xJf "$fname" ; ;;
-          *.zip) unzip "$fname" ; ;;
-        esac
-      fi
-    done
-  fi
-fi
 
 # Apply all patches if present
 echo "Applying patches in $PKGDIR..."

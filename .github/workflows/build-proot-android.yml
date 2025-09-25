@@ -77,6 +77,8 @@ jobs:
           ln -sf ${TOOLCHAIN}/bin/${TARGET}${API}-clang ${TOOLCHAIN}/bin/${TARGET}${API}-gcc
           ln -sf ${TOOLCHAIN}/bin/${TARGET}${API}-clang++ ${TOOLCHAIN}/bin/${TARGET}${API}-g++
           ln -sf ${TOOLCHAIN}/bin/llvm-strip ${TOOLCHAIN}/bin/${TARGET}${API}-strip
+          ln -sf ${TOOLCHAIN}/bin/llvm-objcopy ${TOOLCHAIN}/bin/${TARGET}${API}-objcopy
+          ln -sf ${TOOLCHAIN}/bin/llvm-objdump ${TOOLCHAIN}/bin/${TARGET}${API}-objdump
 
           apply_patches() {
             for p in *.patch; do

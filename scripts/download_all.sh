@@ -18,24 +18,23 @@ while IFS= read -r pkg; do
   PKGDIR="$BUILDDIR/$pkg"
   if [ -d "$PKGDIR" ]; then
     echo "\n===== Downloading $pkg ====="
-    if [ -f "$PKGDIR/pkg.json" ]; then
-      # Accept both array and object for 'download'
-      DOWNLOAD_TYPE=$(jq -r 'type' "$PKGDIR/pkg.json" | jq -r '.download | type' 2>/dev/null || echo "none")
+    cd "$PKGDIR"
+    if [ -f pkg.json ]; then
+      DOWNLOAD_TYPE=$(jq -r '.download | type' pkg.json 2>/dev/null || echo "none")
       if [ "$DOWNLOAD_TYPE" = "object" ]; then
-        DOWNLOADS=$(jq -c '.download' "$PKGDIR/pkg.json")
+        DOWNLOADS=$(jq -c '.download' pkg.json)
       elif [ "$DOWNLOAD_TYPE" = "array" ]; then
-        DOWNLOADS=$(jq -c '.download[]?' "$PKGDIR/pkg.json")
+        DOWNLOADS=$(jq -c '.download[]?' pkg.json)
       else
         DOWNLOADS=""
       fi
       if [ -n "$DOWNLOADS" ]; then
-        for entry in $DOWNLOADS; do
+        echo "$DOWNLOADS" | while IFS= read -r entry; do
           url=$(echo "$entry" | jq -r '.url // empty')
           branch=$(echo "$entry" | jq -r '.branch // empty')
           if [ -n "$url" ] && [ "$url" != "null" ]; then
             fname=$(basename "$url")
             if echo "$url" | grep -q '\.git$'; then
-              # Git repo
               if [ -n "$branch" ] && [ "$branch" != "null" ]; then
                 echo "Cloning $url (branch: $branch)"
                 git clone --depth 1 -b "$branch" "$url"
@@ -44,36 +43,22 @@ while IFS= read -r pkg; do
                 git clone --depth 1 "$url"
               fi
             else
-              # File download
               echo "Downloading $url"
               curl -LO "$url"
-              # Unpack if archive
               case "$fname" in
-                *.tar.gz|*.tgz)
-                  tar xzf "$fname"
-                  ;;
-                *.tar.bz2)
-                  tar xjf "$fname"
-                  ;;
-                *.tar.xz)
-                  tar xJf "$fname"
-                  ;;
-                *.zip)
-                  unzip "$fname"
-                  ;;
+                *.tar.gz|*.tgz) tar xzf "$fname" ;;
+                *.tar.bz2) tar xjf "$fname" ;;
+                *.tar.xz) tar xJf "$fname" ;;
+                *.zip) unzip "$fname" ;;
               esac
-              # Move contents if only one directory was created
-              # Find new directories after extraction
               new_dirs=$(find . -mindepth 1 -maxdepth 1 -type d | grep -v '^\./\.git$')
-              if [ $(echo "$new_dirs" | wc -l) -eq 1 ]; then
+              if [ "$(echo "$new_dirs" | wc -l)" -eq 1 ]; then
                 onlydir=$(echo "$new_dirs")
                 if [ "$onlydir" != "." ] && [ "$onlydir" != "$PKGDIR" ]; then
                   echo "Flattening $onlydir into $PKGDIR..."
-                  # Move all contents up
-                  shopt -s dotglob 2>/dev/null || true
-                  mv "$onlydir"/* ./
+                  mv "$onlydir"/* ./ 2>/dev/null || true
+                  mv "$onlydir"/.[!.]* ./ 2>/dev/null || true
                   rmdir "$onlydir"
-                  shopt -u dotglob 2>/dev/null || true
                 fi
               fi
             fi

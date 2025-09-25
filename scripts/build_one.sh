@@ -8,13 +8,22 @@
 set -e
 
 
+
 PKGDIR="$1"
 if [ -z "$PKGDIR" ]; then
   echo "Usage: $0 <package_dir>" >&2
   exit 1
 fi
 
+# Ensure PKGDIR is absolute
+PKGDIR=$(realpath "$PKGDIR")
 cd "$PKGDIR"
+
+# Set PREFIX if not set
+if [ -z "$PREFIX" ]; then
+  export PREFIX="$PKGDIR/install"
+fi
+export PREFIX=$(realpath "$PREFIX")
 
 # Apply all patches if present
 echo "Applying patches in $PKGDIR..."
@@ -24,26 +33,34 @@ for p in *.patch; do
   patch -p0 < "$p"
 done
 
-# Read configure and build instructions from pkg.json if present
+# Read build instructions from pkg.json if present
 if [ -f pkg.json ]; then
-  # Run configure commands first (expects a 'configure' array of shell commands)
-  CONFIGURE_CMDS=$(jq -r '.configure[]?' pkg.json)
-  if [ -n "$CONFIGURE_CMDS" ]; then
-    echo "$CONFIGURE_CMDS" | while IFS= read -r cmd; do
-      echo "> $cmd"
-      sh -c "$cmd"
+  BUILD_TYPE=$(jq -r '.build | type' pkg.json 2>/dev/null || echo "none")
+  if [ "$BUILD_TYPE" = "object" ]; then
+    for key in $(jq -r '.build | keys[]' pkg.json); do
+      CMDS=$(jq -r --arg k "$key" '.build[$k][]?' pkg.json)
+      if [ -n "$CMDS" ]; then
+        echo "# $key phase"
+        echo "$CMDS" | while IFS= read -r cmd; do
+          [ -z "$cmd" ] && continue
+          echo "> $cmd"
+          sh -c "$cmd"
+        done
+      fi
     done
-  fi
-
-  # Then run build commands (expects a 'build' array of shell commands)
-  BUILD_CMDS=$(jq -r '.build[]?' pkg.json)
-  if [ -n "$BUILD_CMDS" ]; then
-    echo "$BUILD_CMDS" | while IFS= read -r cmd; do
-      echo "> $cmd"
-      sh -c "$cmd"
-    done
+  elif [ "$BUILD_TYPE" = "array" ]; then
+    BUILD_CMDS=$(jq -r '.build[]?' pkg.json)
+    if [ -n "$BUILD_CMDS" ]; then
+      echo "$BUILD_CMDS" | while IFS= read -r cmd; do
+        [ -z "$cmd" ] && continue
+        echo "> $cmd"
+        sh -c "$cmd"
+      done
+    else
+      echo "No build commands found in pkg.json for $PKGDIR"
+    fi
   else
-    echo "No build commands found in pkg.json for $PKGDIR"
+    echo "No build section found in pkg.json for $PKGDIR"
   fi
 
   # Export artifacts if 'export' section exists
@@ -64,5 +81,5 @@ if [ -f pkg.json ]; then
     done
   fi
 else
-  echo "No pkg.json found in $PKGDIR, skipping configure, build, and export commands."
+  echo "No pkg.json found in $PKGDIR, skipping build and export commands."
 fi

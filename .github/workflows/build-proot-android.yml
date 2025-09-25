@@ -98,8 +98,6 @@ jobs:
 
           cd $DWNLD/libarchive
           apply_patches
-          export B_CFLAGS=$CFLAGS
-          export CFLAGS="-std=gnu89 $CFLAGS"
           sh ./build/autogen.sh
           ./configure --host=$TARGET --prefix=$PREFIX \
             --without-xml2 \
@@ -117,7 +115,6 @@ jobs:
             --enable-static
           make
           make install
-          export CFLAGS=$B_CFLAGS
 
           # talloc
           cd $DWNLD/talloc

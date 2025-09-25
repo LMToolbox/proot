@@ -71,9 +71,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y autoconf automake libtool pkg-config
 
+          WORKDIR=$(realpath .)
           export ENV_SET=$(realpath ./set-envs.sh)
           . $ENV_SET
-          
+
           ln -sf ${TOOLCHAIN}/bin/${TARGET}${API}-clang ${TOOLCHAIN}/bin/${TARGET}${API}-gcc
           ln -sf ${TOOLCHAIN}/bin/${TARGET}${API}-clang++ ${TOOLCHAIN}/bin/${TARGET}${API}-g++
           ln -sf ${TOOLCHAIN}/bin/llvm-strip ${TOOLCHAIN}/bin/${TARGET}${API}-strip
@@ -131,6 +132,7 @@ jobs:
               -e DWNLD="$DWNLD" \
               ubuntu:24.04 bash -c "
                 . ./set-envs.sh &&
+                export DEBIAN_FRONTEND=noninteractive
                 apt-get update &&
                 apt-get install -y build-essential autoconf automake libtool pkg-config python3 python3-venv &&
                 python3 -m venv ./venv &&
@@ -165,10 +167,11 @@ jobs:
           make proot care
           export CFLAGS=$B_CFLAGS
           export LDFLAGS=$B_LDFLAGS
-          
-          mkdir -p ../../dist/$ARCH
-          cp proot ../../dist/$ARCH/
-          cp care ../../dist/$ARCH/
+
+          DIST_DIR="$WORKDIR/dist/$ARCH"
+          mkdir -p "$DIST_DIR"
+          cp proot "$DIST_DIR/"
+          cp care "$DIST_DIR/"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

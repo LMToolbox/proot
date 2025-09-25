@@ -28,7 +28,6 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: '3.13'
-          architecture: ${{ matrix.arch == 'aarch64' && 'arm64' || (matrix.arch == 'x86_64' && 'x64' || matrix.arch) }}
 
       - name: Download dependencies
         run: |

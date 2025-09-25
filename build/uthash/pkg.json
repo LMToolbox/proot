@@ -13,7 +13,7 @@
         ],
        "make": [
 "ls",
-            "cp -r src/*.h $PREFIX/include/",
+            "cp -r src/*.h $PREFIX/include/"
        ]
     }
 }

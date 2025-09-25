@@ -2,7 +2,6 @@ export TOOLCHAIN=$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64
 export TARGET=$ARCH-linux-android
 export API=24
 
-export DWNLD=$(realpath $DWNLD)
 export PREFIX=$(realpath $PREFIX)
 
 export AR=$TOOLCHAIN/bin/llvm-ar

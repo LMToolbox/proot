@@ -15,11 +15,21 @@ if [ ! -f "$QUEUE" ]; then
 fi
 
 SETENV="$SCRIPTSDIR/set-env.sh"
+# Set default PREFIX if not set
+if [ -z "$PREFIX" ]; then
+  export PREFIX="$(realpath "$ROOTDIR/dependencies/install")"
+fi
+# Set default ARCH if not set
+if [ -z "$ARCH" ]; then
+  export ARCH="unknown"
+fi
 while IFS= read -r pkg; do
   [ -z "$pkg" ] && continue
   PKGDIR="$BUILDDIR/$pkg"
   if [ -d "$PKGDIR" ]; then
     echo "\n===== Building $pkg ====="
+    export ARCH
+    export PREFIX
     if [ -f "$SETENV" ]; then
       # shellcheck source=/dev/null
       . "$SETENV"

@@ -32,7 +32,6 @@ jobs:
         with:
           platforms: arm64
 
-
       - name: Ubuntu setup
         run: |
           sudo apt-get update
@@ -46,6 +45,7 @@ jobs:
       - name: Build all packages
         run: |
           chmod +x ./scripts/build_all.sh ./scripts/build_one.sh
+          export ARCH=${{ matrix.arch }}
           ./scripts/build_all.sh
 
       - name: Upload artifacts

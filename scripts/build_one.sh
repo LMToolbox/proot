@@ -19,13 +19,20 @@ cd "$PKGDIR"
 
 # Download sources if 'download' section exists
 if [ -f pkg.json ]; then
-  DOWNLOADS=$(jq -c '.download[]?' pkg.json)
+  DOWNLOAD_TYPE=$(jq -r '.download | type' pkg.json 2>/dev/null || echo "none")
+  if [ "$DOWNLOAD_TYPE" = "object" ]; then
+    DOWNLOADS=$(jq -c '.download' pkg.json)
+  elif [ "$DOWNLOAD_TYPE" = "array" ]; then
+    DOWNLOADS=$(jq -c '.download[]?' pkg.json)
+  else
+    DOWNLOADS=""
+  fi
   if [ -n "$DOWNLOADS" ]; then
     for entry in $DOWNLOADS; do
-      url=$(echo "$entry" | jq -r '.url // .')
+      url=$(echo "$entry" | jq -r '.url // empty')
       branch=$(echo "$entry" | jq -r '.branch // empty')
       fname=$(basename "$url")
-      if echo "$url" | grep -q '\\.git$'; then
+      if echo "$url" | grep -q '\.git$'; then
         # Git repo
         if [ -n "$branch" ] && [ "$branch" != "null" ]; then
           echo "Cloning $url (branch: $branch)"

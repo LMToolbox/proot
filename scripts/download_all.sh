@@ -19,7 +19,15 @@ while IFS= read -r pkg; do
   if [ -d "$PKGDIR" ]; then
     echo "\n===== Downloading $pkg ====="
     if [ -f "$PKGDIR/pkg.json" ]; then
-      DOWNLOADS=$(jq -c '.download[]?' "$PKGDIR/pkg.json")
+      # Accept both array and object for 'download'
+      DOWNLOAD_TYPE=$(jq -r 'type' "$PKGDIR/pkg.json" | jq -r '.download | type' 2>/dev/null || echo "none")
+      if [ "$DOWNLOAD_TYPE" = "object" ]; then
+        DOWNLOADS=$(jq -c '.download' "$PKGDIR/pkg.json")
+      elif [ "$DOWNLOAD_TYPE" = "array" ]; then
+        DOWNLOADS=$(jq -c '.download[]?' "$PKGDIR/pkg.json")
+      else
+        DOWNLOADS=""
+      fi
       if [ -n "$DOWNLOADS" ]; then
         for entry in $DOWNLOADS; do
           url=$(echo "$entry" | jq -r '.url // empty')

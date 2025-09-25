@@ -18,6 +18,7 @@ cd "$PKGDIR"
 
 # Set PREFIX if not set
 if [ -z "$PREFIX" ]; then
+  mkdir -p "$ROOTDIR/dependencies/install"
   export PREFIX="$PKGDIR/install"
 fi
 export PREFIX=$(realpath "$PREFIX")

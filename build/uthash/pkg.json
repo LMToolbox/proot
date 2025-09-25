@@ -11,7 +11,7 @@
             "mkdir -p $PREFIX/include/"
         ],
        "make": [
-            "cp -r *.h $PREFIX/include/"
+            "cp -r src/*.h $PREFIX/include/"
        ]
     }
 }

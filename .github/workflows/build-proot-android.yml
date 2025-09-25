@@ -69,7 +69,7 @@ jobs:
           DWNLD: ${{ env.DWNLD }}
         run: |
           sudo apt-get update
-          sudo apt-get install -y autoconf automake libtool pkg-config
+          sudo apt-get install -y autoconf automake libtool pkg-config qemu-user-static
 
           cp -r "$ANDROID_NDK" ./ndk
           export ANDROID_NDK=$(realpath ./ndk)
@@ -129,35 +129,24 @@ jobs:
               -v "$PWD":/workspace \
               -v "$ANDROID_NDK":"$ANDROID_NDK" \
               -w /workspace \
-              -e ANDROID_NDK="$ANDROID_NDK" \
-              -e ARCH="$ARCH" \
-              -e PREFIX="$PREFIX" \
-              -e DWNLD="$DWNLD" \
               ubuntu:24.04 bash -c "
-                . ./set-envs.sh &&
                 export DEBIAN_FRONTEND=noninteractive
                 apt-get update &&
-                apt-get install -y build-essential autoconf automake libtool pkg-config python3 python3-venv &&
-                python3 -m venv ./venv &&
-                . ./venv/bin/activate &&
-                ./configure \
-                  --host=$TARGET \
-                  --prefix=$PREFIX \
-                  --bundled-libraries=ALL &&
-                make &&
-                make install
+                apt-get install -y python3 python3-venv &&
+                python3 -m venv ./venv
               "
           else
             echo "Running natively on $ARCH"
             python3 -m venv .venv
-            . .venv/bin/activate
+          fi
+          
+          . .venv/bin/activate
             ./configure \
-              --host=$TARGET \
-              --prefix=$PREFIX \
+              --host=$TARGET --prefix=$PREFIX \
+              ----cross-compile --cross-execute="qemu-$ARCH-static -L $TOOLCHAIN/sysroot"
               --bundled-libraries=ALL
             make
             make install
-          fi
 
           # uthash
           cd $DWNLD/uthash

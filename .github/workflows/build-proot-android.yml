@@ -121,11 +121,14 @@ jobs:
           make install
 
           # talloc
+          export B_LDFLAGS=$LDFLAGS
+          export LDFLAGS="$LDFLAGS -lz"
           cd $DWNLD/cpython
           apply_patches
-          ./configure --build=$(gcc -dumpmachine) --host=$TARGET --prefix=$PREFIX --with-build-python=$(which python3) --enable-optimizations
+          ./configure --build=$(gcc -dumpmachine) --host=$TARGET --prefix=$PREFIX --with-build-python=$(which python3)
           make
           make install
+          export LDFLAGS=$B_LDFLAGS
 
           export B_LDFLAGS=$LDFLAGS
           export LDFLAGS="$LDFLAGS -lpython3.13"

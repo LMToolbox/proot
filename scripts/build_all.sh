@@ -17,6 +17,7 @@ fi
 SETENV="$SCRIPTSDIR/set-env.sh"
 # Set default PREFIX if not set
 if [ -z "$PREFIX" ]; then
+  mkdir -p "$ROOTDIR/dependencies/install"
   export PREFIX="$(realpath "$ROOTDIR/dependencies/install")"
 fi
 # Set default ARCH if not set

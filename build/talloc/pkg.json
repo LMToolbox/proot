@@ -12,7 +12,7 @@
             ". .venv/bin/activate &&",
             "if [ \"$ARCH\" = \"aarch64\" ]; then",
             "  export PYTHON_VERSION='3.13' PYTAG='cpython313' pyext_PATTERN=\"%s.so\" PYTHON_LDFLAGS='-ldl -lm' LDFLAGS=\"$LDFLAGS -lpython3.13\"",
-            "fi &&",
+            "; fi &&",
             "./configure",
             "--host=$TARGET --prefix=$PREFIX",
             "--cross-compile --cross-execute=\"qemu-$ARCH-static -L $TOOLCHAIN/sysroot\"",

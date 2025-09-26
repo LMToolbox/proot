@@ -64,7 +64,7 @@ if [ -f pkg.json ]; then
 
   # Export artifacts if 'export' section exists
   EXPORT_CMDS=$(jq -r '.export[]?' pkg.json)
-  cd src
+  cd pkg
   if [ -n "$EXPORT_CMDS" ]; then
     ARCHDIR="${ARCH:-unknown}"
     ROOTDIR="$(realpath "$PKGDIR/../..")"

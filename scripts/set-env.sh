@@ -2,9 +2,6 @@ export TOOLCHAIN=$ANDROID_NDK/toolchains/llvm/prebuilt/linux-x86_64
 export TARGET=$ARCH-linux-android
 export API=24
 
-mkdir -p ${PWD}/install
-export PREFIX=$(realpath ${PWD}/install)
-
 export AR=$TOOLCHAIN/bin/llvm-ar
 export CC="$TOOLCHAIN/bin/clang --target=$TARGET$API"
 export AS=$CC

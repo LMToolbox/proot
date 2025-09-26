@@ -27,7 +27,9 @@ export PREFIX=$(realpath "$PREFIX")
 for p in *.patch; do
   [ -f "$p" ] || continue
   echo "Applying patch $p"
+  cd pkg
   patch -p0 < "$p"
+  cd ..
 done
 
 # Read build instructions from pkg.json if present
@@ -35,21 +37,21 @@ if [ -f pkg.json ]; then
   BUILD_TYPE=$(jq -r '.build | type' pkg.json 2>/dev/null || echo "none")
 
   if [ "$BUILD_TYPE" = "object" ]; then
-      CMDS=$(jq -r --arg k "$key" '.build[$k][]?' pkg.json | xargs)
-      if [ -n "$CMDS" ]; then
-        echo "# $key phase (merged)"
-        echo "> $CMDS"
-        (cd "$PKGDIR/pkg" && sh -c "$CMDS")
-      fi
+    for key in $(jq -r '.build | keys[]' pkg.json); do
+      CMD=$(jq -r --arg k "$key" '.build[$k][]?' pkg.json | paste -sd " " -)
+      [ -z "$CMD" ] && continue
+      echo "# $key phase (merged)"
+      echo "> $CMD"
+      sh -c "$CMD"
+    done
+
   elif [ "$BUILD_TYPE" = "array" ]; then
-    CMDS=$(jq -r '.build[]?' pkg.json | xargs)
-    if [ -n "$CMDS" ]; then
-      echo "# build phase (merged)"
-      echo "> $CMDS"
-      (cd "$PKGDIR/pkg" && sh -c "$CMDS")
-    else
-      echo "No build commands found in pkg.json for $PKGDIR"
-    fi
+    CMD=$(jq -r '.build[]?' pkg.json | paste -sd " " -)
+    [ -z "$CMD" ] && continue
+    echo "# build phase (merged)"
+    echo "> $CMD"
+    sh -c "$CMD"
+  fi
 
   else
     echo "No build section found in pkg.json for $PKGDIR"

@@ -10,7 +10,7 @@
         "configure": [
             "python -m venv .venv &&",
             ". .venv/bin/activate &&",
-            "export PYTHON_VERSION='3.13' PYTAG='cpython313' pyext_PATTERN=\"%s.so\" PYTHON_LDFLAGS='-ldl -lm -lpython3.13' CFLAGS=\"$CFLAGS -I$PREFIX/include/python3.13\"",
+            "export PYTHON_VERSION='3.13' PYTAG='cpython313' pyext_PATTERN=\"%s.so\" PYTHON_LDFLAGS='-ldl -lm -lpython3.13' CFLAGS=\"$CFLAGS -I$PREFIX/include/python3.13\" &&",
             "./configure",
             "--host=$TARGET --prefix=$PREFIX",
             "--cross-compile --cross-execute=\"qemu-$ARCH-static -L $TOOLCHAIN/sysroot\"",

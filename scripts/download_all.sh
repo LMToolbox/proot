@@ -37,10 +37,10 @@ while IFS= read -r pkg; do
             if echo "$url" | grep -q '\.git$'; then
               if [ -n "$branch" ] && [ "$branch" != "null" ]; then
                 echo "Cloning $url (branch: $branch)"
-                git clone --depth 1 -b "$branch" "$url"
+                git clone --depth 1 -b "$branch" "$url" .
               else
                 echo "Cloning $url (default branch)"
-                git clone --depth 1 "$url"
+                git clone --depth 1 "$url" .
               fi
             else
               echo "Downloading $url"

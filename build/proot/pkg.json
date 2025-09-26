@@ -14,11 +14,22 @@
        "ln -sf ${TOOLCHAIN}/bin/llvm-objdump ${TOOLCHAIN}/bin/${TARGET}${API}-objdump &&",
        "export CROSS_COMPILE=\"${TOOLCHAIN}/bin/${TARGET}${API}-\" &&",
        "make -j$(nproc) -C src loader.elf build.h &&",
-       "make -j$(nproc) -C src proot care"
+       "make -j$(nproc) -C src proot care &&",
+       "mv src/proot src/proot-debug && mv src/care src/care-debug &&",
+       "cp src/proot-debug src/proot && cp src/care-debug src/care &&",
+       "$TOOLCHAIN/bin/$TARGET$API-strip src/proot &&",
+       "$TOOLCHAIN/bin/$TARGET$API-strip src/care"
      ]
   },
-  "export": [
-    "src/proot",
-    "src/care"
-  ]
+  "export": {
+    "debug": [
+      "src/proot-debug",
+      "src/care-debug"
+    ],
+    "stripped": [
+      "src/proot",
+      "src/care"
+    ]
+    
+  }
 }

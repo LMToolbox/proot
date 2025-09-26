@@ -1,6 +1,5 @@
 {
-    "comment": "Required by talloc",
-
+    "comment": "Python for PROOT",
     "download": {
         "branch": "v3.13.7",
         "url": "https://github.com/python/cpython.git"
@@ -13,15 +12,14 @@
             "ac_cv_func_getentropy=no",
             "./configure",
             "--prefix=${PREFIX}",
-            "--enable-shared",
             "--without-ensurepip",
-            "--build=$(gcc -dumpmachine)", 
+            "--build=$(gcc -dumpmachine)",
             "--host=$TARGET",
             "--with-build-python=$(which python3)"
         ],
-       "make": [
+        "make": [
             "make &&",
             "make install"
-       ]
+        ]
     }
 }

@@ -14,7 +14,6 @@ if [ ! -f "$QUEUE" ]; then
   exit 1
 fi
 
-SETENV="$SCRIPTSDIR/set-env.sh"
 # Set default PREFIX if not set
 if [ -z "$PREFIX" ]; then
   mkdir -p "$ROOTDIR/dependencies/install"
@@ -31,10 +30,6 @@ while IFS= read -r pkg; do
     echo "\n===== Building $pkg ====="
     export ARCH
     export PREFIX
-    if [ -f "$SETENV" ]; then
-      # shellcheck source=/dev/null
-      . "$SETENV"
-    fi
     "$SCRIPTSDIR/build_one.sh" "$PKGDIR"
   else
     echo "Package directory $PKGDIR does not exist, skipping."

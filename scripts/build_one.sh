@@ -32,29 +32,27 @@ done
 # Read build instructions from pkg.json if present
 if [ -f pkg.json ]; then
   BUILD_TYPE=$(jq -r '.build | type' pkg.json 2>/dev/null || echo "none")
+
   if [ "$BUILD_TYPE" = "object" ]; then
     for key in $(jq -r '.build | keys[]' pkg.json); do
-      CMDS=$(jq -r --arg k "$key" '.build[$k][]?' pkg.json)
+      CMDS=$(jq -r --arg k "$key" '.build[$k][]?' pkg.json | xargs)
       if [ -n "$CMDS" ]; then
-        echo "# $key phase"
-        echo "$CMDS" | while IFS= read -r cmd; do
-          [ -z "$cmd" ] && continue
-          echo "> $cmd"
-          (cd "$PKGDIR/pkg" && sh -c "$cmd")
-        done
+        echo "# $key phase (merged)"
+        echo "> $CMDS"
+        (cd "$PKGDIR/pkg" && sh -c "$CMDS")
       fi
     done
+
   elif [ "$BUILD_TYPE" = "array" ]; then
-    BUILD_CMDS=$(jq -r '.build[]?' pkg.json)
+    BUILD_CMDS=$(jq -r '.build[]?' pkg.json | xargs)
     if [ -n "$BUILD_CMDS" ]; then
-      echo "$BUILD_CMDS" | while IFS= read -r cmd; do
-        [ -z "$cmd" ] && continue
-        echo "> $cmd"
-        (cd "$PKGDIR/pkg" && sh -c "$cmd")
-      done
+      echo "# build phase (merged)"
+      echo "> $BUILD_CMDS"
+      (cd "$PKGDIR/pkg" && sh -c "$BUILD_CMDS")
     else
       echo "No build commands found in pkg.json for $PKGDIR"
     fi
+
   else
     echo "No build section found in pkg.json for $PKGDIR"
   fi
@@ -76,6 +74,7 @@ if [ -f pkg.json ]; then
       fi
     done
   fi
+
 else
   echo "No pkg.json found in $PKGDIR, skipping build and export commands."
 fi

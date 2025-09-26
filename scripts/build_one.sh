@@ -70,9 +70,10 @@ if [ -f pkg.json ]; then
     DIST_DIR="$ROOTDIR/dist/$ARCHDIR"
     mkdir -p "$DIST_DIR"
     echo "$EXPORT_CMDS" | while IFS= read -r f; do
-      if [ -e "$f" ]; then
+      fpath="src/$f"
+      if [ -e "$fpath" ]; then
         echo "Exporting $f to $DIST_DIR/"
-        cp -a "$f" "$DIST_DIR/"
+        cp -a "$fpath" "$DIST_DIR/"
       else
         echo "Export file $f not found, skipping."
       fi

@@ -8,7 +8,7 @@
     },
     "build": {
         "configure": [
-            "sh ./build/autogen.sh",
+            "sh ./build/autogen.sh &&",
             "./configure",
             "--host=$TARGET --prefix=$PREFIX",
             "--without-xml2 --without-openssl --without-nettle --without-expat --without-iconv --without-bz2lib --without-lzma --without-lz4 --without-zstd --without-xattr --without-acl",

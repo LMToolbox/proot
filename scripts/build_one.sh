@@ -42,7 +42,7 @@ if [ -f pkg.json ]; then
       [ -z "$CMD" ] && continue
       echo "# $key phase (merged)"
       echo "> $CMD"
-      sh -c "$CMD"
+      (cd pkg && sh -c "$CMD")
     done
 
   elif [ "$BUILD_TYPE" = "array" ]; then
@@ -50,7 +50,7 @@ if [ -f pkg.json ]; then
     [ -z "$CMD" ] && continue
     echo "# build phase (merged)"
     echo "> $CMD"
-    sh -c "$CMD"
+    (cd pkg && sh -c "$CMD")
   fi
 
   else

@@ -11,7 +11,8 @@
         "configure": [
             "CFLAGS=\"-fPIC $CFLAGS\"",
             "./configure",
-            "--prefix=${PREFIX}"
+            "--prefix=${PREFIX}",
+            "--host=$TARGET"
         ],
        "make": [
             "make &&",

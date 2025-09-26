@@ -16,6 +16,8 @@ fi
 PKGDIR=$(realpath "$PKGDIR")
 cd "$PKGDIR"
 
+SETENV="$SCRIPTSDIR/set-env.sh"
+
 # Set PREFIX if not set
 if [ -z "$PREFIX" ]; then
   export PREFIX="$PKGDIR/install"
@@ -48,6 +50,11 @@ if [ -f pkg.json ]; then
     [ -z "$CMD" ] && continue
     echo "# build phase (merged)"
     echo "> $CMD"
+    if [ -f "$SETENV" ] && [ ! -f env_off ]; then
+      # shellcheck source=/dev/null
+      echo "Auto-configuring build env"
+      . "$SETENV"
+    fi
     (cd pkg && eval "$CMD")
 
   else

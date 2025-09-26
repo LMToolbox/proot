@@ -40,6 +40,9 @@ if [ -f pkg.json ]; then
     # shellcheck source=/dev/null
     echo "Auto-configuring build env"
     . "$SETENV"
+  else 
+    echo $SETENV
+    ls
   fi
 
   if [ "$BUILD_TYPE" = "object" ]; then

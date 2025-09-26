@@ -9,9 +9,9 @@
     },
     "build": {
         "configure": [
+            "CFLAGS=\"-fPIC $CFLAGS\"",
             "./configure",
-            "--prefix=${PREFIX}",
-            "CFLAGS='-fPIC $CFLAGS'"
+            "--prefix=${PREFIX}"
         ],
        "make": [
             "make &&",

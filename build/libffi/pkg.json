@@ -10,7 +10,7 @@
         "configure": [
             "./autogen.sh &&",
             "./configure",
-            "---prefix=$PREFIX"
+            "--prefix=$PREFIX"
         ],
        "make": [
             "make &&",

@@ -15,7 +15,7 @@
             "LDFLAGS='$LDFLAGS -lpython3.13'"
         ],
        "make": [
-            "make",
+            "make &&",
             "make install"
        ]
     }

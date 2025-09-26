@@ -40,7 +40,7 @@ if [ -f pkg.json ]; then
       [ -z "$CMD" ] && continue
       echo "# $key phase (merged)"
       echo "> $CMD"
-      (cd pkg && sh -c "$CMD")
+      (cd pkg && eval "$CMD")
     done
 
   elif [ "$BUILD_TYPE" = "array" ]; then
@@ -48,7 +48,7 @@ if [ -f pkg.json ]; then
     [ -z "$CMD" ] && continue
     echo "# build phase (merged)"
     echo "> $CMD"
-    (cd pkg && sh -c "$CMD")
+    (cd pkg && eval "$CMD")
 
   else
     echo "No build section found in pkg.json for $PKGDIR"

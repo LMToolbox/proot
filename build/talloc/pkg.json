@@ -11,7 +11,7 @@
             "python -m venv .venv &&",
             ". .venv/bin/activate &&",
             "if [ \"$ARCH\" = \"aarch64\" ]; then",
-            "  export PYTHON_VERSION='3.13' PYTAG='cpython313' pyext_PATTERN=\"%s.so\" PYTHON_LDFLAGS='-ldl -lm' LDFLAGS=\"$LDFLAGS -lpython3.13\"",
+            "  export PYTHON_VERSION='3.13' PYTAG='cpython313' pyext_PATTERN=\"%s.so\" PYTHON_LDFLAGS='-ldl -lm' CFLAGS=\"$CFLAGS -I$PREFIX/include/python3.13\"",
             "; fi &&",
             "./configure",
             "--host=$TARGET --prefix=$PREFIX",

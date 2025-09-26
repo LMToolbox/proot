@@ -37,10 +37,10 @@ while IFS= read -r pkg; do
             if echo "$url" | grep -q '\.git$'; then
               if [ -n "$branch" ] && [ "$branch" != "null" ]; then
                 echo "Cloning $url (branch: $branch)"
-                git clone --depth 1 -b "$branch" "$url" .
+                git clone --depth 1 -b "$branch" "$url" pkg
               else
                 echo "Cloning $url (default branch)"
-                git clone --depth 1 "$url" .
+                git clone --depth 1 "$url" pkg
               fi
             else
               echo "Downloading $url"
@@ -55,9 +55,10 @@ while IFS= read -r pkg; do
               if [ "$(echo "$new_dirs" | wc -l)" -eq 1 ]; then
                 onlydir=$(echo "$new_dirs")
                 if [ "$onlydir" != "." ] && [ "$onlydir" != "$PKGDIR" ]; then
-                  echo "Flattening $onlydir into $PKGDIR..."
-                  mv "$onlydir"/* ./ 2>/dev/null || true
-                  mv "$onlydir"/.[!.]* ./ 2>/dev/null || true
+                  echo "Flattening $onlydir into $PKGDIR/pkg..."
+mkdir -p pkg
+                  mv "$onlydir"/* ./pkg 2>/dev/null || true
+                  mv "$onlydir"/.[!.]* ./pkg 2>/dev/null || true
                   rmdir "$onlydir"
                 fi
               fi

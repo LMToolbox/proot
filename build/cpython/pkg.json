@@ -17,7 +17,7 @@
             "LDFLAGS='$LDFLAGS -lz'"
         ],
        "make": [
-            "make",
+            "make &&",
             "make install"
        ]
     }

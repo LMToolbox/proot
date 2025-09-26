@@ -6,13 +6,14 @@
     },
     "build": {
         "configure": [
-            "export LDFLAGS=\"$LDFLAGS -lz\" CFLAGS=\"$CFLAGS -fPIC\" ac_cv_file__dev_ptmx=yes ac_cv_file__dev_ptc=no ac_cv_func_getentropy=no &&",
+            "export export TARGET=$ARCH-linux-gnu LDFLAGS=\"-lz\" CFLAGS=\"-fPIC\" ac_cv_file__dev_ptmx=yes ac_cv_file__dev_ptc=no ac_cv_func_getentropy=no &&",
             "./configure",
             "--prefix=${PREFIX}",
             "--without-ensurepip",
             "--build=$(gcc -dumpmachine)",
             "--host=$TARGET",
-            "--with-build-python=$(which python3)"
+            "--with-build-python=$(which python3)",
+            "--enable-optimizations"
         ],
         "make": [
             "make &&",

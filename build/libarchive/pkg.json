@@ -15,7 +15,7 @@
             "--disable-shared --enable-static"
         ],
        "make": [
-            "make &&",
+            "make -j$(nproc) &&",
             "make install"
        ]
     }

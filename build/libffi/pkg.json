@@ -1,0 +1,20 @@
+{
+    "comment": "Required by cpython",
+
+    "download": {
+        "branch": "v3.5.2",
+
+        "url": "https://github.com/libffi/libffi.git"
+    },
+    "build": {
+        "configure": [
+            "./autogen.sh",
+            "./configure",
+            "---prefix=$PREFIX"
+        ],
+       "make": [
+            "make &&",
+            "make install"
+       ]
+    }
+}

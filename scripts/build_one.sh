@@ -20,6 +20,7 @@ cd "$PKGDIR"
 if [ -z "$PREFIX" ]; then
   export PREFIX="$PKGDIR/install"
 fi
+mkdir -p "$PREFIX"
 export PREFIX=$(realpath "$PREFIX")
 
 # Apply all patches if present
@@ -35,23 +36,21 @@ if [ -f pkg.json ]; then
 
   if [ "$BUILD_TYPE" = "object" ]; then
     for key in $(jq -r '.build | keys[]' pkg.json); do
-      CMDS=$(jq -r --arg k "$key" '.build[$k][]?' pkg.json | xargs)
-      if [ -n "$CMDS" ]; then
-        echo "# $key phase (merged)"
-        echo "> $CMDS"
-        (cd "$PKGDIR/pkg" && sh -c "$CMDS")
-      fi
+      jq -r --arg k "$key" '.build[$k][]?' pkg.json | while IFS= read -r CMD; do
+        [ -z "$CMD" ] && continue
+        echo "# $key phase"
+        echo "> $CMD"
+        sh -c "$CMD"
+      done
     done
 
   elif [ "$BUILD_TYPE" = "array" ]; then
-    BUILD_CMDS=$(jq -r '.build[]?' pkg.json | xargs)
-    if [ -n "$BUILD_CMDS" ]; then
-      echo "# build phase (merged)"
-      echo "> $BUILD_CMDS"
-      (cd "$PKGDIR/pkg" && sh -c "$BUILD_CMDS")
-    else
-      echo "No build commands found in pkg.json for $PKGDIR"
-    fi
+    jq -r '.build[]?' pkg.json | while IFS= read -r CMD; do
+      [ -z "$CMD" ] && continue
+      echo "# build phase"
+      echo "> $CMD"
+      sh -c "$CMD"
+    done
 
   else
     echo "No build section found in pkg.json for $PKGDIR"
@@ -60,10 +59,9 @@ if [ -f pkg.json ]; then
   # Export artifacts if 'export' section exists
   EXPORT_CMDS=$(jq -r '.export[]?' pkg.json)
   if [ -n "$EXPORT_CMDS" ]; then
-    # Use $ARCH and $WORKDIR if set, else fallback
     ARCHDIR="${ARCH:-unknown}"
-    WORKDIR="${WORKDIR:-$(pwd)}"
-    DIST_DIR="$WORKDIR/dist/$ARCHDIR"
+    ROOTDIR="$(realpath "$PKGDIR/../..")"
+    DIST_DIR="$ROOTDIR/dist/$ARCHDIR"
     mkdir -p "$DIST_DIR"
     echo "$EXPORT_CMDS" | while IFS= read -r f; do
       if [ -e "$f" ]; then

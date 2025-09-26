@@ -16,7 +16,7 @@
              "--disable-ipv6"
         ],
         "make": [
-            "make &&",
+            "make -j$(nproc) &&",
             "make install"
         ]
     }

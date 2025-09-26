@@ -8,16 +8,16 @@
     },
     "build": {
         "configure": [
-            "python -m venv .venv",
-            ". .venv/bin/activate",
+            "python -m venv .venv &&",
+            ". .venv/bin/activate &&",
+            "LDFLAGS='$LDFLAGS -lpython3.13'",
             "./configure",
             "--host=$TARGET --prefix=$PREFIX",
             "--cross-compile --cross-execute='qemu-$ARCH-static -L $TOOLCHAIN/sysroot'",
             "--bundled-libraries=ALL",
-            "LDFLAGS='$LDFLAGS -lpython3.13'"
         ],
        "make": [
-           ". .venv/bin/activate",
+           ". .venv/bin/activate &&",
             "make &&",
             "make install"
        ]

@@ -1,14 +1,15 @@
 {
-  "download": [
-    {
-      "url": "https://github.com/proot-me/proot.git",
-      "branch": "master"
-    }
-  ],
-  "build": [
-    "make -C src loader.elf loader-m32.elf build.h &&",
-    "make -C src proot care"
-  ],
+  "download": {
+    "url": "https://github.com/proot-me/proot.git",
+    "branch": "master"
+  },
+  "build": {
+    "configure": [],
+     "make": [
+        "make -C src loader.elf loader-m32.elf build.h &&",
+        "make -C src proot care"
+     ]
+  }
   "export": [
     "src/proot",
     "src/care"

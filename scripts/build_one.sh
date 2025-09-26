@@ -40,7 +40,7 @@ if [ -f pkg.json ]; then
         [ -z "$CMD" ] && continue
         echo "# $key phase"
         echo "> $CMD"
-        sh -c "$CMD"
+        (cd "$PKGDIR/pkg" && sh -c "$CMD")
       done
     done
 
@@ -49,7 +49,7 @@ if [ -f pkg.json ]; then
       [ -z "$CMD" ] && continue
       echo "# build phase"
       echo "> $CMD"
-      sh -c "$CMD"
+      (cd "$PKGDIR/pkg" && sh -c "$CMD")
     done
 
   else

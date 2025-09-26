@@ -36,6 +36,12 @@ for p in *.patch; do
 if [ -f pkg.json ]; then
   BUILD_TYPE=$(jq -r '.build | type' pkg.json 2>/dev/null || echo "none")
 
+  if [ -f "$SETENV" ] && [ ! -f env_off ]; then
+    # shellcheck source=/dev/null
+    echo "Auto-configuring build env"
+    . "$SETENV"
+  fi
+
   if [ "$BUILD_TYPE" = "object" ]; then
     for key in $(jq -r '.build | keys[]' pkg.json); do
       CMD=$(jq -r --arg k "$key" '.build[$k][]?' pkg.json | paste -sd " " -)
@@ -50,11 +56,6 @@ if [ -f pkg.json ]; then
     [ -z "$CMD" ] && continue
     echo "# build phase (merged)"
     echo "> $CMD"
-    if [ -f "$SETENV" ] && [ ! -f env_off ]; then
-      # shellcheck source=/dev/null
-      echo "Auto-configuring build env"
-      . "$SETENV"
-    fi
     (cd pkg && eval "$CMD")
 
   else

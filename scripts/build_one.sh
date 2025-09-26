@@ -51,7 +51,6 @@ if [ -f pkg.json ]; then
     echo "# build phase (merged)"
     echo "> $CMD"
     (cd pkg && sh -c "$CMD")
-  fi
 
   else
     echo "No build section found in pkg.json for $PKGDIR"

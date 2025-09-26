@@ -40,7 +40,7 @@ if [ -f pkg.json ]; then
         echo "$CMDS" | while IFS= read -r cmd; do
           [ -z "$cmd" ] && continue
           echo "> $cmd"
-          sh -c "$cmd"
+          (cd "$PKGDIR/pkg" && sh -c "$cmd")
         done
       fi
     done
@@ -50,7 +50,7 @@ if [ -f pkg.json ]; then
       echo "$BUILD_CMDS" | while IFS= read -r cmd; do
         [ -z "$cmd" ] && continue
         echo "> $cmd"
-        sh -c "$cmd"
+        (cd "$PKGDIR/pkg" && sh -c "$cmd")
       done
     else
       echo "No build commands found in pkg.json for $PKGDIR"

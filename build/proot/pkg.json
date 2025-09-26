@@ -6,7 +6,7 @@
   "build": {
     "configure": [],
      "make": [
-       "export LDFLAGS=\"$LDFLAGS -llog -ldl -lm -lpython3.13\" &&",
+       "export LDFLAGS=\"$LDFLAGS -lz -lpython3.13\" PYTHON=\"$PREFIX/bin/python3\" CFLAGS=\"$CFLAGS -I$PREFIX/include/python3.13\" &&",
         "make -C src loader.elf loader-m32.elf build.h &&",
         "make -C src proot care"
      ]

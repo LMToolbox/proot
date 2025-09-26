@@ -9,6 +9,7 @@
     },
     "build": {
         "configure": [
+            "export CFLAGS=\"-fPIC $CFLAGS\" &&",
             "./configure",
             "--prefix=${PREFIX}"
         ],

@@ -63,34 +63,30 @@ if [ -f pkg.json ]; then
   fi
 
   # Export artifacts if 'export' section exists
-  EXPORT_CMDS_STRIPPED=$(jq -r '.export.stripped[]?' pkg.json)
-  EXPORT_CMDS_DEBUG=$(jq -r '.export.debug[]?' pkg.json)
+  ARCHDIR="${ARCH:-unknown}"
+  ROOTDIR="$(realpath "$PKGDIR/../..")"
   DIST_DIR_STRIPPED="$ROOTDIR/dist/$ARCHDIR/stripped"
   DIST_DIR_DEBUG="$ROOTDIR/dist/$ARCHDIR/debug"
+  EXPORT_CMDS_STRIPPED=$(jq -r '.export.stripped[]?' pkg.json)
+  EXPORT_CMDS_DEBUG=$(jq -r '.export.debug[]?' pkg.json)
   cd pkg
   if [ -n "$EXPORT_CMDS_DEBUG" ]; then
-    ARCHDIR="${ARCH:-unknown}"
-    ROOTDIR="$(realpath "$PKGDIR/../..")"
-    DIST_DIR="$DIST_DIR_DEBUG"
-    mkdir -p "$DIST_DIR"
+    mkdir -p "$DIST_DIR_DEBUG"
     echo "$EXPORT_CMDS_DEBUG" | while IFS= read -r f; do
       if [ -e "$f" ]; then
-        echo "Exporting $f to $DIST_DIR/"
-        cp -a "$f" "$DIST_DIR/"
+        echo "Exporting $f to $DIST_DIR_DEBUG/"
+        cp -a "$f" "$DIST_DIR_DEBUG/"
       else
         echo "Export file $f not found, skipping."
       fi
     done
   fi
   if [ -n "$EXPORT_CMDS_STRIPPED" ]; then
-    ARCHDIR="${ARCH:-unknown}"
-    ROOTDIR="$(realpath "$PKGDIR/../..")"
-    DIST_DIR="$DIST_DIR_STRIPPED"
-    mkdir -p "$DIST_DIR"
+    mkdir -p "$DIST_DIR_STRIPPED"
     echo "$EXPORT_CMDS_STRIPPED" | while IFS= read -r f; do
       if [ -e "$f" ]; then
-        echo "Exporting $f to $DIST_DIR/"
-        cp -a "$f" "$DIST_DIR/"
+        echo "Exporting $f to $DIST_DIR_STRIPPED/"
+        cp -a "$f" "$DIST_DIR_STRIPPED/"
       else
         echo "Export file $f not found, skipping."
       fi

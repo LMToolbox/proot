@@ -10,7 +10,7 @@
         "configure": [
             "python -m venv .venv &&",
             ". .venv/bin/activate &&",
-            "LDFLAGS='$LDFLAGS -lpython3.13'",
+            "LDFLAGS=\"$LDFLAGS -lpython3.13\"",
             "./configure",
             "--host=$TARGET --prefix=$PREFIX",
             "--cross-compile --cross-execute=\"qemu-$ARCH-static -L $TOOLCHAIN/sysroot\"",

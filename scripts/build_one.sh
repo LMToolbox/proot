@@ -35,22 +35,21 @@ if [ -f pkg.json ]; then
   BUILD_TYPE=$(jq -r '.build | type' pkg.json 2>/dev/null || echo "none")
 
   if [ "$BUILD_TYPE" = "object" ]; then
-    for key in $(jq -r '.build | keys[]' pkg.json); do
-      jq -r --arg k "$key" '.build[$k][]?' pkg.json | while IFS= read -r CMD; do
-        [ -z "$CMD" ] && continue
-        echo "# $key phase"
-        echo "> $CMD"
-        (cd "$PKGDIR/pkg" && sh -c "$CMD")
-      done
-    done
-
+      CMDS=$(jq -r --arg k "$key" '.build[$k][]?' pkg.json | xargs)
+      if [ -n "$CMDS" ]; then
+        echo "# $key phase (merged)"
+        echo "> $CMDS"
+        (cd "$PKGDIR/pkg" && sh -c "$CMDS")
+      fi
   elif [ "$BUILD_TYPE" = "array" ]; then
-    jq -r '.build[]?' pkg.json | while IFS= read -r CMD; do
-      [ -z "$CMD" ] && continue
-      echo "# build phase"
-      echo "> $CMD"
-      (cd "$PKGDIR/pkg" && sh -c "$CMD")
-    done
+    CMDS=$(jq -r '.build[]?' pkg.json | xargs)
+    if [ -n "$CMDS" ]; then
+      echo "# build phase (merged)"
+      echo "> $CMDS"
+      (cd "$PKGDIR/pkg" && sh -c "$CMDS")
+    else
+      echo "No build commands found in pkg.json for $PKGDIR"
+    fi
 
   else
     echo "No build section found in pkg.json for $PKGDIR"

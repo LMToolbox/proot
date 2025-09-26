@@ -13,7 +13,7 @@
        "ln -sf ${TOOLCHAIN}/bin/llvm-objcopy ${TOOLCHAIN}/bin/${TARGET}${API}-objcopy &&",
        "ln -sf ${TOOLCHAIN}/bin/llvm-objdump ${TOOLCHAIN}/bin/${TARGET}${API}-objdump &&",
        "export CROSS_COMPILE=\"${TOOLCHAIN}/bin/${TARGET}${API}-\" &&",
-       "make -C src loader.elf loader-m32.elf build.h &&",
+       "make -C src loader.elf build.h &&",
        "make -C src proot care"
      ]
   },

@@ -7,7 +7,7 @@ set -e
 ROOTDIR="$(dirname "$0")/.."
 BUILDDIR="$ROOTDIR/build"
 QUEUE="$BUILDDIR/queue.txt"
-export SCRIPTSDIR="$ROOTDIR/scripts"
+export SCRIPTSDIR=$(realpath "$ROOTDIR/scripts")
 
 if [ ! -f "$QUEUE" ]; then
   echo "queue.txt not found in $BUILDDIR" >&2

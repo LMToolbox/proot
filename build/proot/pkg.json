@@ -15,10 +15,17 @@
        "export CROSS_COMPILE=\"${TOOLCHAIN}/bin/${TARGET}${API}-\" &&",
        "make -j$(nproc) -C src loader.elf build.h &&",
        "make -j$(nproc) -C src proot care &&",
+       
        "mv src/proot src/proot-debug && mv src/care src/care-debug &&",
        "cp src/proot-debug src/proot && cp src/care-debug src/care &&",
+
+        "$TOOLCHAIN/bin/$TARGET$API-objcopy --align-section=0x4000 src/proot-debug src/proot-aligned && mv src/proot-aligned src/proot-debug &&",
+       "$TOOLCHAIN/bin/$TARGET$API-objcopy --align-section=0x4000 src/care-debug src/care-aligned && mv src/care-aligned src/care-debug &&",
+
        "$TOOLCHAIN/bin/$TARGET$API-strip src/proot &&",
-       "$TOOLCHAIN/bin/$TARGET$API-strip src/care"
+       "$TOOLCHAIN/bin/$TARGET$API-strip src/care &&",
+       "$TOOLCHAIN/bin/$TARGET$API-objcopy --align-section=0x4000 src/proot src/proot-aligned && mv src/proot-aligned src/proot &&",
+       "$TOOLCHAIN/bin/$TARGET$API-objcopy --align-section=0x4000 src/care src/care-aligned && mv src/care-aligned src/care"
      ]
   },
   "export": {

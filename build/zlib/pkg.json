@@ -14,7 +14,7 @@
             "--prefix=${PREFIX}"
         ],
        "make": [
-            "make &&",
+            "make -j$(nproc) &&",
             "make install"
        ]
     }

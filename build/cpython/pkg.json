@@ -12,9 +12,7 @@
             "--without-ensurepip",
             "--build=$(gcc -dumpmachine)",
             "--host=$TARGET",
-            "--with-build-python=$(which python3)",
-            "--enable-optimizations",
-            "--disable-ipv6"
+            "--with-build-python=$(which python3)"
         ],
         "make": [
             "make &&",

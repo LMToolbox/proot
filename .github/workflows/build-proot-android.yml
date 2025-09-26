@@ -29,7 +29,7 @@ jobs:
       - name: Ubuntu setup
         run: |
           sudo apt-get update
-          sudo apt-get install -y git curl jq autoconf automake libtool pkg-config unzip qemu-user-static texinfo libltdl-dev
+          sudo apt-get install -y git curl jq autoconf automake libtool pkg-config unzip qemu-user-static texinfo libltdl-dev gcc libffi-dev
           git config --global advice.detachedHead false
 
       - name: Download all sources

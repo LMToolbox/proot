@@ -15,7 +15,7 @@
             "--disable-shared --enable-static"
         ],
        "make": [
-            "make",
+            "make &&",
             "make install"
        ]
     }

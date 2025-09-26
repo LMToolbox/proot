@@ -27,10 +27,8 @@ export PREFIX=$(realpath "$PREFIX")
 for p in *.patch; do
   [ -f "$p" ] || continue
   echo "Applying patch $p"
-  cd pkg
-  patch -p0 < "$p"
-  cd ..
-done
+  patch -p0 -d pkg < "$p"
+  done
 
 # Read build instructions from pkg.json if present
 if [ -f pkg.json ]; then

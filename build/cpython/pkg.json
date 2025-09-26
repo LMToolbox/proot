@@ -2,7 +2,7 @@
     "comment": "Required by talloc",
 
     "download": {
-        "branch": "v3.12.7",
+        "branch": "v3.13.7",
         "url": "https://github.com/python/cpython.git"
     },
     "build": {

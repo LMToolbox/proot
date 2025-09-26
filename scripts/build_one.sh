@@ -64,21 +64,22 @@ if [ -f pkg.json ]; then
 
   # Export artifacts if 'export' section exists
   EXPORT_CMDS=$(jq -r '.export[]?' pkg.json)
+  cd src
   if [ -n "$EXPORT_CMDS" ]; then
     ARCHDIR="${ARCH:-unknown}"
     ROOTDIR="$(realpath "$PKGDIR/../..")"
     DIST_DIR="$ROOTDIR/dist/$ARCHDIR"
     mkdir -p "$DIST_DIR"
     echo "$EXPORT_CMDS" | while IFS= read -r f; do
-      fpath="src/$f"
-      if [ -e "$fpath" ]; then
+      if [ -e "$f" ]; then
         echo "Exporting $f to $DIST_DIR/"
-        cp -a "$fpath" "$DIST_DIR/"
+        cp -a "$f" "$DIST_DIR/"
       else
         echo "Export file $f not found, skipping."
       fi
     done
   fi
+  cd ..
 
 else
   echo "No pkg.json found in $PKGDIR, skipping build and export commands."

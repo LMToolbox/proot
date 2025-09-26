@@ -7,14 +7,17 @@
     },
     "build": {
         "configure": [
+            "LDFLAGS=\"$LDFLAGS -lz\"",
+            "ac_cv_file__dev_ptmx=yes",
+            "ac_cv_file__dev_ptc=no",
+            "ac_cv_func_getentropy=no",
             "./configure",
             "--prefix=${PREFIX}",
             "--enable-shared",
             "--without-ensurepip",
             "--build=$(gcc -dumpmachine)", 
             "--host=$TARGET",
-            "--with-build-python=$(which python3)",
-            "LDFLAGS='$LDFLAGS -lz'"
+            "--with-build-python=$(which python3)"
         ],
        "make": [
             "make &&",

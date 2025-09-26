@@ -8,8 +8,6 @@
     },
     "build": {
         "configure": [
-            "python -m venv .venv &&",
-            ". .venv/bin/activate &&",
             "export PYTHON_VERSION='3.13' PYTAG='cpython313' pyext_PATTERN=\"%s.so\" PYTHON_LDFLAGS='-llog -ldl -lm -lpython3.13' CFLAGS=\"$CFLAGS -I$PREFIX/include/python3.13\" &&",
             "./configure",
             "--host=$TARGET --prefix=$PREFIX",
@@ -17,7 +15,6 @@
             "--bundled-libraries=ALL"
         ],
        "make": [
-           ". .venv/bin/activate &&",
             "make -j$(nproc) &&",
             "make install"
        ]
